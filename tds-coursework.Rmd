@@ -375,8 +375,6 @@ df_total_ac_leeds %>% # Start with the main dataframe
 
 ```
 
-
-
 ```{r #pre-process_7}
 
 ### 7. CLASS CONVERSION ###
@@ -416,7 +414,6 @@ write.csv(df_total_ac_leeds_cleaned, "Data/df_total_ac_leeds_cleaned.csv")
 ```
 
 Out of 48 variables, 28 were selected for subsequent analyses. We used functions in the lubridate package to extract the year, month and day from the date variable. As some variables were categorical but of the character class, they were converted to the factor class. There were originally 21 unique types of casualties in the dataset, but since our analyses would not require such fine-grained details, they were recategorised into six main groups. There were also multiple records corresponding to a single accident event, possibly due to accidents with multiple casualties. These duplicates were filtered out.    
-
 ```{r load_df_total_ac_leeds_cleaned, eval=TRUE}
 
 df_total_ac_leeds <- 
@@ -523,8 +520,6 @@ declines in the numbers of accidents and casualties since 2015. 2018 saw 25% les
   df_total_ac_leeds_cleaned %>% 
   mutate(accident_severity = factor(accident_severity, 
                                     levels = c("Slight", "Serious", "Fatal"))) %>% 
-  # group_by(accident_index) %>% # Group by accident index
-  # distinct() %>% # Only distinct accidents 
   group_by(year, accident_severity) %>% 
   dplyr::summarise(count = n()) %>%
   ggplot(aes(x = year,
@@ -552,7 +547,7 @@ include_graphics("Figures/Figure_3.png")
 
 # 4. The 'Who': Profile of Accident Casualties
 
-Having pre-processed the data and performed EDA, we will analyse it to gain insights on accidents involving pedestrians and cyclists. The focus of this section is answering the question, "Who were most at risk of accidents?" In answering this question, the approach was to understand the profiles of accident casualties based on past data. 
+Having pre-processed the data and performed EDA, we will analyse it to gain insights on accidents involving pedestrians and cyclists. The focus of this section is answering the question, "Who were at risk of accidents?" by understanding the profiles of accident casualties based on past data. 
 
 ## 4.1 Methodology
 
@@ -612,22 +607,29 @@ include_graphics("Figures/Figure_4.png")
 
 ```
 
-Several useful insights can be extracted from Figure 4. For cyclists, there were significantly more male casualties than female. The distribution of male cyclist casualties appeared to be bimodal, that is, having two peaks---one at around 24 years old and another at around 40. The former could be attributed to male student population at the universities who cycle to school, whereas the latter could be more mature male adults who cycle to work, or cycle for competitive or recreational purposes. The peak age for female cyclist casualties was less apparent, although it seemed to be around mid-20s. One similarity is that the age distributions for both male and female cyclist casualties taper off at 75. 
+Several useful insights can be extracted from Figure 4. For cyclists, there were significantly more male casualties than female. The distribution of male cyclist casualties appeared to be bimodal, that is, having two peaks---one at around 24 years old and another at around 40. The former could be attributed to male student population at the universities who cycle to school, whereas the latter could be more mature male adults who cycle to work, or cycle for competitive or recreational purposes. The peak age for female cyclist casualties was less apparent, although it seemed to be around mid-20s. One similarity between male and female cyclist casualties was that their age distributions tapered off at 75. 
 
-Unlike cyclist casualties, pedestrian casualties had more equal distribution of male and female. The age distributions for male and female pedestrian casualties are both positively skewed, with peaks at 12 and 14 years respectively. These could be mainly high school students who get into accidents during their journeys either to or from schools, suggesting that more can be done by parents and schools to educate young children on road safety. The histogram also shows that, unlike cyclists, the age distribution only tapers off in the late-80s or 90s. This implies that there were many elderly pedestrians who were susceptible to accidents. 
+Unlike cyclist casualties, pedestrian casualties had more equal distribution between the genders. The age distributions for male and female pedestrian casualties were both positively skewed, with peaks at 12 and 14 years old respectively. These could be mainly high school students who get into accidents during their journeys either to or from schools. The histogram for pedestrians shows that the age distribution only tapered off in the late-80s or 90s, implying that many elderly were susceptible to accidents as pedestrians. 
 
-The boxplots for cyclist casualties show that the median age of male casualties, shown by the middle black line in the box, was slightly higher than that of female casualties, although the spread of age in the middle 50% of data, measured by the inter-quartile range (IQR) and shown by the height of the box, were roughly similar. Pedestrian casualties, on the other hand, have lower median ages than cyclist casualties, suggesting that younger people tend to be victims of accidents as pedestrians. Another difference is that pedestrian casualties have higher IQR, which means that the range of age of victims as pedestrians is wider than as cyclists.  
+The boxplots show that pedestrian casualties were of lower median ages than cyclist casualties but they had higher IQR, meaning that the range of age of casualties was wider. This could also be observed from the histograms. For cyclist casualties, the median age of male casualties, shown by the middle black line of the box, was slightly higher than that of female casualties, although the spread of age measured by the inter-quartile range (IQR)^[The IQR is the difference between the upper quartile and lower quartile and represents the middle 50% of data. In boxplots, it is indicated by the height of the box.] were roughly similar. The converse is true for pedestrian casualties---female casualties were of a slightly higher median age than male. 
 
 # 5. The 'When': Temporal Distribution of Accidents
 
-In this section, we seek to answer the question, "When were accidents most likely to occur?" In answering this question, we will analyse temporal patterns of accident involving pedestrians and cyclists by months, days and hours. 
+Although accidents are random events in space and time, it is possible to extract temporal patterns with enough data. This will be the focus of this section. Specifically, we will seek to address the question, "When were accidents most likely to occur?" 
 
 ## 5.1 Methodology
 
-To aid us in uncovering temporal patterns, we visualised the data using heatmaps. In general, heatmaps are a useful tool to visualise relative volumes of events within the dataset. The effectiveness of heatmaps stems from their abilities to draw the viewer's attention to specific trends and areas of interest through the use of colours and shades. Heatmaps are extremely powerful in our analysis because the darker shades indicate the times when it was most accident-prone for pedestrians and cyclists. 
+To aid us in uncovering temporal patterns, we visualised the data using heatmaps. Heatmaps are generally useful in visualising relative volumes of events within a dataset. Their effectiveness stems from the ability to draw the viewer's attention to specific trends and areas of interest through the use of colours and shades. 
 
-We created two heatmaps, one for visualising the number of accidents by days of a week and months of a year, and another for visualising the number of accidents by days of a week and hours of a day. Before creating these heatmaps, the data first needed to be in the correct form. For instance, it was necessary to specify the levels of the variables `day_of_week` and `month`, to ensure that the sequence of months and days are accurately reflected in the resulting heatmaps. The `geom_tile()` function was then used together with `facet_grid()` and `facet_wrap()` to display the heatmaps for pedestrian and cyclist accidents together. The detailed code is shown in the R Markdown file.   
+We created two heatmaps---one for number of casualties by months, and another for number of casualties by hour of a day. Before creating them, the data first needed to be in the correct form. For instance, it was necessary to specify the levels of the variables `day_of_week` and `month` to ensure the correct sequence of months and days in the resulting heatmaps. The `geom_tile()` function was used together with `facet_grid()` and `facet_wrap()` to display the heatmaps for pedestrian and cyclist accidents together. 
 
+## 5.2 Results and Discussions
+
+The resulting heatmaps are shown in Figures 5 and 6. These heatmaps are extremely insightful in this analysis because they communicate the most accident-prone times in an effective way using the darker shades.
+#stopped here
+Figure 5 shows that November, December and January were relatively more 
+
+seemed to be dangerous months for cyclists. During these winter months, the weather is typically colder, and the roads wet and slippery. Cyclists are exposed to such harsh weather elements and these conditions make them more susceptible to accidents. On the other hand, the safest months for cyclist are April and August. 
 
 ```{r #df_cal_hm}
 
@@ -657,11 +659,16 @@ df_cal_hm <- ddply(df_cal_hm, .(yearmonth), transform,
   filter(cas_type == "Pedestrian" | cas_type == "Cyclist") %>% 
   group_by(month, monthweek, day_of_week, cas_type) %>% 
   dplyr::summarise(count = n()) %>% 
-  mutate(cas_type = factor(cas_type, levels = c("Pedestrian", "Cyclist"))) %>% 
+  mutate(cas_type = factor(cas_type, levels = c("Pedestrian", "Cyclist"))) %>%
+  spread(monthweek, count) %>% 
+  replace(is.na(.), 0) %>%
+  gather(key = "monthweek", value = "count", -month, -day_of_week, -cas_type) %>% 
   ggplot(aes(monthweek, day_of_week, fill = count)) +
   geom_tile(colour="white") +
   facet_grid(cas_type ~ month) +
-  scale_fill_distiller(palette = "YlOrRd", direction = 1, name = "Number\nof Accidents") +
+  scale_x_discrete(breaks = c(2, 4, 6), 
+                   labels = c("2", "4", "6")) + 
+  scale_fill_distiller(palette = "YlOrRd", direction = 1, name = "Number\nof Casualties") +
   xlab("Weeks of a month") +
   ylab("") +
   theme_bw() + theme_minimal())
@@ -670,7 +677,7 @@ figure_5 + ggsave("Figures/Figure_5.png", width = 12, height = 3)
 
 ```
 
-```{r display_figure_5, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Heatmap showing the number of pedestrian and cyclist accidents, by day and month"}
+```{r display_figure_5, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Heatmap showing the number of pedestrian and cyclist casualties, by day and month"}
 
 include_graphics("Figures/Figure_5.png")
 
@@ -681,23 +688,21 @@ include_graphics("Figures/Figure_5.png")
 # Create a data frame for unique number of accidents involving pedestrians in Leeds from 2014-2018
 df_ped_leeds_accidents =
   df_total_ac_leeds_cleaned %>% 
-  group_by(accident_index) %>% 
-  distinct() %>% 
   filter(cas_type == "Pedestrian")
 
 # Create a data frame for unique number of accidents involving cyclists in Leeds from 2014-2018
 df_cyc_leeds_accidents =
   df_total_ac_leeds_cleaned %>% 
-  group_by(accident_index) %>% 
-  distinct() %>% 
   filter(cas_type == "Cyclist")
 
 ```
 
 ```{r #figure_6}
 
+break_hour <- seq(from = 0, to = 24, by = 4)
+
 (figure_6 <- 
-  df_total_ac_leeds_cleaned %>% 
+  df_total_ac_leeds %>% 
   group_by(accident_index) %>% 
   distinct() %>% 
   filter(cas_type == "Pedestrian" | cas_type == "Cyclist") %>% 
@@ -715,7 +720,7 @@ df_cyc_leeds_accidents =
   mutate(cas_type = factor(cas_type, levels = c("Pedestrian", "Cyclist"))) %>% 
   ggplot(aes(time_hour, day_of_week)) +
   geom_tile(aes(fill = count), colour = "white", na.rm = TRUE, show.legend = TRUE) +
-  scale_fill_distiller(palette = "YlOrRd", direction = 1, name = "Number\nof Accidents") +
+  scale_fill_distiller(palette = "YlOrRd", direction = 1, name = "Number\nof Casualties") +
   scale_x_continuous(breaks = break_hour,
                      labels = c("00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00")) +
   # scale_x_reverse(breaks = break_hour,
@@ -733,15 +738,14 @@ figure_6 + ggsave("Figures/figure_6.png", width = 8, height = 4)
 
 ```
 
-```{r display_figure_6, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Heatmap showing the number of pedestrian and cyclist accidents, by hour and day", out.width="60%"}
+```{r display_figure_6, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Heatmap showing the number of pedestrian and cyclist casualties, by hour and day", out.width="60%"}
 
 include_graphics("Figures/Figure_6.png")
 
 ```
 
-## 5.2 Results and Discussions
 
-The two heatmaps are shown in Figures 5 and 6. Figure 6 reveals several interesting patterns. November, December and January seem to be dangerous months for cyclists. During these winter months, the weather is typically colder, and the roads wet and slippery. Cyclists are exposed to such harsh weather elements and these conditions make them more susceptible to accidents. On the other hand, the safest months for cyclist are April and August. 
+
 
 For pedestrians, the last two weeks of the months of September seem to have recorded most accidents. This time also coincides with the beginning of the academic year for University students, which means this is the time of the year in Leeds when there is an increase in the  population of either returning students or new international students.   Unlike cyclists, the winter months tend to be relatively safer for pedestrians, which seems reasonable because people might tend to go out less due to the cold weather. 
 
@@ -1513,6 +1517,10 @@ od_leeds %>%
 
 # 8. Policy Recommendations
 
+, suggesting that more can be done by parents and schools to educate young children on road safety. 
+
+elderly.
+male student. male mature adults. female 20s. 
 Given the analyses and findings, I plan to propose some policy recommendations to enhance road safety for these VRUs. These recommendations can be broadly classified into the following main categories:
 
 - Road infrastructure and engineering
@@ -1524,6 +1532,8 @@ Given the analyses and findings, I plan to propose some policy recommendations t
 In this section, I plan to state the limitations of this project and how my analyses can be improved/changed.
 
 The first OSM boundary returned by OSM may not be the official boundary used by local authorities
+
+Section 4: limited demographic information about accident victims. 
 
 # 10. Conclusions
 
