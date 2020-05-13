@@ -746,16 +746,16 @@ Figure 6 reveals that there were two distinct accident-prone periods for both pe
 
 Another difference between both groups was that the polarisation of the morning and evening accident-prone periods on weekdays was less distinct for pedestrians than for cyclists. This means that there were more pedestrian casualties between mornings and evenings on weekdays than cyclist casualties. 
 
-
 # 6. The 'Where': Geospatial Distribution of Accidents 
 
-Having gained insights into the temporal distribution of pedestrian and cyclist casyalties, we will, in this section, analyse the data geospatially. The key question to be addressed in this section is, "Where were the most accident-prone locations?" Such analyses have significant real-world implications. For instance, they enable local authorities to better prioritise and allocate resources for road infrastructure improvement works.  
+Having gained insights into the temporal distribution of pedestrian and cyclist casyalties, we will, in this section, analyse the data geospatially. The key question to be addressed is, "Where were the most accident-prone locations?" This section explores this question in two aspects---by LSOA regions and by road networks. Such analyses have significant real-world implications. For instance, they enable local authorities to better prioritise and allocate resources for road infrastructure improvement works.  
 
 ## 6.1 Methodology
-## stopped here.
-The raw datasets from the `stats19` package contain the LSOA of the accident location. To analyse the accident rates by LSOA, we needed data specifying the boundaries of the LSOAs. This data was obtained from the the UK Data Service (cite) and subsequently joined with our cleaned version of Leeds accident dataset. The resulting dataset contains accident counts for pedestrians and cyclists in terms of absolute numbers. 
 
-Whilst absolute numbers are useful in understanding the scale of accident rates in a region, our assessment was normalising the absolute numbers against the average number of accidents for each group would be more informative in identifying regions of concern, as well as those with encouraging accident numbers. We will refer to these normalised values as the "accident index". Accident indices range between -1 and 1; a negative value means that a region has below-average accident counts for that casualty group and a positive value means otherwise. An accident index value of around zero suggests that the region is close to the average. We then plotted thematic maps with a divergent colour scale (discuss more to rationalise this viz).
+The first approach was to analyse the geospatial distribution of accidents by LSOA regions. The datasets from the `stats19` package contained the LSOA of accident locations, but not their boundaries. This data had to be obtained from the UK Data Service (cite) and subsequently joined with our working dataset of accidents in Leeds. Instead of using absolute accident counts for pedestrians and cyclists in mapping this geospatial distribution, it was assessed that normalising these absolute numbers against the average for each group would be more informative in identifying regions in both ends of the spectrum--the safest and the most worrying regions.
+
+These normalised accident counts will be referred to as the "accident index". An accident index ranges between -1 and 1; a negative index indicates that a region has below-average accident count, that is, a safer-than-average accident rate, and a positive index means otherwise. An accident index of around zero suggests that the region is close to the overall average. Thematic maps were plotted with these accident indices for both groups. A divergent colour scale was used to communicate geospatial variations of accident rates in an effective way: blue representing below-average rates and red, above-average. Basemaps were also included to provide some geographical context. 
+
 
 ## 6.2 Results and Discussions
 
@@ -853,6 +853,11 @@ Figure 7 shows thematic maps depicting the geospatial distribution of accident r
 
 The map on the right for cyclist accidents has more regions highlighted in dark red than the map for pedestrian accidents. There are four LSOA with accident indices greater than 0.80; one of them being E01033010 as well. In fact, these regions are close to one other, and they cover stretches of main arterial roads, such as Headingley Lane, Woodhouse Lane and Kirkstall Road, which links towards either the University or the city centre. A total of 141 accidents were recorded in these four LSOAs between 2014 and 2018. As with pedestrian accidents, none of these accidents were fatal and a vast majority resulted in slight injuries.       
 
+
+
+darker shades of red represent areas of concern.
+
+
 ```{r #accident_counts}
 
 df_total_ac_leeds_cleaned %>% 
@@ -866,6 +871,23 @@ df_total_ac_leeds_cleaned %>%
 Reconsider: Another spatial pattern from the left thematic map in Figure 8 is that the regions further away from Leeds city centre tend to be shaded in blue, which means that they are safer in terms of number of pedestrian accidents in that five-year period. (explain?)
 
 While an analysis by LSOAs is useful in allowing policy-makers to focus on more accident-prone regions, it does not provide insights into which stretches of roads within those "problematic" regions are of greatest concerns in terms of accident susceptibility. An analysis by roads, as shown in Figure 9, mitigates this limitation.  
+
+==
+
+```{r}
+
+colnames(df_total_ac_leeds)
+unique(df_total_ac_leeds$junction_detail)
+unique(df_total_ac_leeds$light_conditions)
+
+```
+
+
+==
+
+The second approach was to analyse the geospatial distribution of accidents by road networks. The different categories of highways in Leeds were first downloaded using the `osm` package and these individual datasets were then concatenated. The resulting dataset was an simple features (sf) object with linestrings representing stretches of roads. Spatial joins were performed using the `st_is_within()` function to link accident point data to the nearest stretch of road within a distance of 5 metres. 
+
+
 
 ```{r #download_osm_as_sf}
 
@@ -919,13 +941,14 @@ sf_osm_leeds_7 =
 sel_cols <- c("osm_id", "name", "ref", "highway", "maxspeed", "geometry")
 
 # For each sf object, select desired columns only.
-df_osm_leeds_1 = sf_osm_leeds_1$osm_lines %>% select(sel_cols)
-df_osm_leeds_2 = sf_osm_leeds_2$osm_lines %>% select(sel_cols)
-df_osm_leeds_3 = sf_osm_leeds_3$osm_lines %>% select(sel_cols)
-df_osm_leeds_4 = sf_osm_leeds_4$osm_lines %>% select(sel_cols)
-df_osm_leeds_5 = sf_osm_leeds_5$osm_lines %>% mutate(ref = NA) %>%  select(sel_cols)
-df_osm_leeds_6 = sf_osm_leeds_6$osm_lines %>% select(sel_cols)
-df_osm_leeds_7 = sf_osm_leeds_7$osm_lines %>% select(sel_cols)
+df_osm_leeds_1 = sf_osm_leeds_1$osm_lines %>% select(all_of(sel_cols))
+df_osm_leeds_2 = sf_osm_leeds_2$osm_lines %>% select(all_of(sel_cols))
+df_osm_leeds_3 = sf_osm_leeds_3$osm_lines %>% select(all_of(sel_cols))
+df_osm_leeds_4 = sf_osm_leeds_4$osm_lines %>% select(all_of(sel_cols))
+df_osm_leeds_5 = sf_osm_leeds_5$osm_lines %>% mutate(ref = NA) %>%  
+  select(all_of(sel_cols))
+df_osm_leeds_6 = sf_osm_leeds_6$osm_lines %>% select(all_of(sel_cols))
+df_osm_leeds_7 = sf_osm_leeds_7$osm_lines %>% select(all_of(sel_cols))
 
 # Combine them to form a single sf object
 sf_osm_leeds = rbind(df_osm_leeds_1,
@@ -935,12 +958,6 @@ sf_osm_leeds = rbind(df_osm_leeds_1,
                      df_osm_leeds_5,
                      df_osm_leeds_6,
                      df_osm_leeds_7)
-
-# Converting from linestrings to multiline strings for roads with multiple linestrings
-# sf_osm_leeds_mls <-
-# sf_osm_leeds %>% 
-#   group_by(name) %>% 
-#   dplyr::summarise(count = n())
 
 sf_osm_leeds_multiline <-
 sf_osm_leeds %>%
@@ -1726,3 +1743,42 @@ Some inferences can be made from this observation regarding people's travel beha
 It can be inferred that people cycle for the specific purposes of commuting to work or school, which could explain why there were lesser accidents during work or school hours. On the contrary, there were more pedestrian casualties during work or school hours because 
 
 In addition, pedestrians seemed to be fairly accident-prone on weekends, particularly accident-prone on Saturdays between 4.00pm and 5.00pm.
+
+### EXTRA
+
+
+```{r}
+
+df_ped_leeds_accidents %>% 
+  group_by(light_conditions, weather_conditions) %>% 
+  dplyr::summarise(count = n()) %>% 
+  ggplot(aes(x = weather_conditions, y = light_conditions, size = count)) +
+  geom_count(alpha = 0.5) +
+  scale_size(range = c(3, 15))
+
+df_cyc_leeds_accidents %>% 
+  group_by(light_conditions, weather_conditions) %>% 
+  dplyr::summarise(count = n()) %>% 
+  ggplot(aes(x = weather_conditions, y = light_conditions, size = count)) +
+  geom_count(alpha = 0.5) +
+  scale_size(range = c(3, 15))
+
+
+```
+
+```{r}
+
+df_ped_leeds_accidents %>% 
+  group_by(junction_detail) %>% 
+  dplyr::summarise(count = n()) %>% 
+  ggplot(aes(x = junction_detail, y = count)) +
+  geom_col()
+
+df_cyc_leeds_accidents %>% 
+  group_by(junction_detail) %>% 
+  dplyr::summarise(count = n()) %>% 
+  ggplot(aes(x = junction_detail, y = count)) +
+  geom_col()
+
+```
+
