@@ -32,29 +32,13 @@ In this project, we will be applying transport data science techniques to analys
 
 ## 1.1 Area of Study
 
-Leeds is situated in the West Yorkshire county of England, occupying 551.7 square kilometres of land area.
-It has a population size of close to 800,000 (cite ONS) and a population density of about 1,450 residents per
-square kilometres. Leeds is divided into 107 Middle Layer Super Output Areas (MSOAs), which are further
-divided into 482 Lower Layer Super Output Areas (LSOAs). Each LSOA has an average population size of
-about 1,600.
+Leeds is situated in the West Yorkshire county of England, occupying 551.7 square kilometres of land area. It has a population size of close to 800,000 (cite ONS) and a population density of about 1,450 residents per square kilometres. Leeds is divided into 107 Middle Layer Super Output Areas (MSOAs), which are further divided into 482 Lower Layer Super Output Areas (LSOAs). Each LSOA has an average population size of about 1,600.
 
-In terms of transportation, Leeds is well-connected by air, rail and roads. It is accessible by several major
-motorways such as the M1 and A62. Congestion is a major problem in Leeds; Leeds was ranked 9th in the
-UK’s most congested urban areas in 2018 (cite). On the road safety front, pedestrians and cyclists were
-over-represented in accidents in Leeds. Based on the 2011 census, 15.6% of the surveyed population walk
-to work, but only 2.3% cycle (cite). However, pedestrians and cyclists respectively accounted for 19.0% and
-16.9% of more than 9,000 accident casualties between 2014 and 2018.
+In terms of transportation, Leeds is well-connected by air, rail and roads. It is accessible by several major motorways such as the M1 and A62. Congestion is a major problem in Leeds; Leeds was ranked 9th in the UK’s most congested urban areas in 2018 (cite). On the road safety front, pedestrians and cyclists were over-represented in accidents in Leeds. Based on the 2011 census, 15.6% of the surveyed population walk to work, but only 2.3% cycle (cite). However, pedestrians and cyclists respectively accounted for 19.0% and 16.9% of more than 9,000 accident casualties between 2014 and 2018.
 
 ## 1.1 Scope
 
-This report analyses road safety of pedestrians and cyclists in Leeds in terms of four categories: who, when,
-where and how. We will first articulate the methodologies used in understanding, preparing, cleaning and visualising the data as part of exploratory data analysis (EDA) in Section 2. In Sections 3 to 6, we will
-perform the analyses in each of the four categories and discuss the results. In Section 7, we will propose
-policy recommendations to improve road safety for pedestrians and cyclists. We will discuss limitations of
-our analyses in Section 8 before proposing areas for future research in Section 9. All analyses underlying
-this report were performed using the R statistical software and are reproducible using the code available at
-. . .
-
+This report analyses road safety of pedestrians and cyclists in Leeds in terms of four categories: who, when, where and how. We will first articulate the methodologies used in understanding, preparing, cleaning and visualising the data as part of exploratory data analysis (EDA) in Section 2. In Sections 3 to 6, we will perform the analyses in each of the four categories and discuss the results. In Section 7, we will propose policy recommendations to improve road safety for pedestrians and cyclists. We will discuss limitations of our analyses in Section 8 before proposing areas for future research in Section 9. All analyses underlying this report were performed using the R statistical software and are reproducible using the code available at . . .
 
 ```{r, message=FALSE, eval=FALSE, include=FALSE}
 # install.packages("remotes")
@@ -66,11 +50,7 @@ this report were performed using the R statistical software and are reproducible
 
 # 2. Datasets
 
-We will be using accidents and casualties data from the `stats19` package for the years 2014 to 2018. This
-five-year period was chosen as it was deemed sufficient to produce meaningful, relevant and current insights.
-In analysing geospatial distribution of accidents, we will be using Leeds’ highway data from the `osmdata`
-package. We will also be using origin-destination data of Leeds from the `pct` package to derive walking and
-cycling rates in Leeds. The datasets required in this report are also available at . . .
+We will be using accidents and casualties data from the `stats19` package for the years 2014 to 2018. This five-year period was chosen as it was deemed sufficient to produce meaningful, relevant and current insights. In analysing geospatial distribution of accidents, we will be using Leeds’ highway data from the `osmdata` package. We will also be using origin-destination data of Leeds from the `pct` package to derive walking and cycling rates in Leeds. The datasets required in this report are also available at . . .
 
 ```{r load_packages, eval=TRUE, message=FALSE, warning=FALSE}
 
@@ -147,23 +127,13 @@ for (i in 1:length(years)){
 
 # 3. Data Understanding
 
-Before analysing the data, it was important to first understand the contents of the raw datasets before
-pre-processing them into forms suitable for subsequent analyses. This section will explain these stages in
-the context of the raw accident and casualties data from the `stats19` package.
+Before analysing the data, it was important to first understand the contents of the raw datasets before pre-processing them into forms suitable for subsequent analyses. This section will explain these stages in the context of the raw accident and casualties data from the `stats19` package.
 
 ## 3.1 Understanding the Raw Datasets
 
-A useful way to understand the raw datasets was to first look at the column headings. The
-`stats19_variables` function provided brief descriptions of the variables. Since these raw datasets
-would later be concatenated, it was important that their column names matched. We found that for the raw
-accidents datasets, the names of all of the 33 columns matched. However, for the raw casualties datasets,
-it was found that the 2014 dataset contained 15 variables, but the rest contained 16. The missing variable
-was `casualty_imd_decile`, which could have been recorded only from 2015 onwards.
+A useful way to understand the raw datasets was to first look at the column headings. The `stats19_variables` function provided brief descriptions of the variables. Since these raw datasets would later be concatenated, it was important that their column names matched. We found that for the raw accidents datasets, the names of all of the 33 columns matched. However, for the raw casualties datasets, it was found that the 2014 dataset contained 15 variables, but the rest contained 16. The missing variable was `casualty_imd_decile`, which could have been recorded only from 2015 onwards.
 
-In addition, we used the `str()` function to determine the classes of each variable as well as their values.
-Doing so allowed us to identify variables which required conversion of classes. For example, the variable
-`accident_severity` was of `character` class, but given that it is a catagorical variable, it had to be converted
-to the `factor` class.
+In addition, we used the `str()` function to determine the classes of each variable as well as their values. Doing so allowed us to identify variables which required conversion of classes. For example, the variable `accident_severity` was of `character` class, but given that it is a catagorical variable, it had to be converted to the `factor` class.
 
 ```{r #eda1}
 
@@ -181,15 +151,9 @@ str(raw_ac_2014)
 
 ## 3.2 Data Preparation 
 
-Having gained an understanding of the datasets, the next step was to prepare them for our analyses. We
-filtered records for Leeds using the `filter()` function. For each year, we used the `left_join()` function
-to join the raw accident data to the raw casualties data, using accident index as the joining key. Next, we
-concatenated the datasets for the individual years into a main dataframe using the `bind_rows()` function.
+Having gained an understanding of the datasets, the next step was to prepare them for our analyses. We filtered records for Leeds using the `filter()` function. For each year, we used the `left_join()` function to join the raw accident data to the raw casualties data, using accident index as the joining key. Next, we concatenated the datasets for the individual years into a main dataframe using the `bind_rows()` function.
 
-Data cleaning is also an important part of data preparation. The raw datasets from the `stats19` package had
-been cleaned and formatted to a large extent. Notwithstanding, we found that a minority of the variables
-contained missing data. One of them was the variable `time`, which had five `NA` values. These missing values
-were imputed with the median^[Median was chosen over mean as it is typically less sensitive to outliers.] of the non-missing values1. The variable `lsoa_of_accident_location` was also found to have 58 `NA` values. Using `tmap` and the LSOA boundaries data, we manually inspected accident locations corresponding to each missing value and assigned the nearest LSOA to each missing value.
+Data cleaning is also an important part of data preparation. The raw datasets from the `stats19` package had been cleaned and formatted to a large extent. Notwithstanding, we found that a minority of the variables contained missing data. One of them was the variable `time`, which had five `NA` values. These missing values were imputed with the median^[Median was chosen over mean as it is typically less sensitive to outliers.] of the non-missing values1. The variable `lsoa_of_accident_location` was also found to have 58 `NA` values. Using `tmap` and the LSOA boundaries data, we manually inspected accident locations corresponding to each missing value and assigned the nearest LSOA to each missing value.
 
 
 ```{r #df_total_ac_leeds}
@@ -233,11 +197,7 @@ df_total_ac_leeds = bind_rows(df_leeds_ac_2014,
 
 ```
 
-It was assessed that preserving the accident records of these missing values would ensure that the analyses
-were more thorough. In other instances, alternative methods of dealing with missing values include deletion,
-imputation with mean and replacement with zero values. Apart from checking for missing data, another key
-step is to check for possible outliers, which can be due to human errors in data recording and therefore need
-to be removed. One common method of identifying outliers is to visualise the data using boxplots.
+It was assessed that preserving the accident records of these missing values would ensure that the analyses were more thorough. In other instances, alternative methods of dealing with missing values include deletion, imputation with mean and replacement with zero values. Apart from checking for missing data, another key step is to check for possible outliers, which can be due to human errors in data recording and therefore need to be removed. One common method of identifying outliers is to visualise the data using boxplots.
 
 ```{r #pre_process_1}
 
@@ -249,20 +209,16 @@ rowSums(is.na(df_total_ac_leeds))
 
 ```
 
-```{r}
+```{r #pre-process_2}
 
+### 2. MISSING VALUES IN 'TIME' COLUMN  ###
 
-```
+# There are 5 NAs in the column 'time'. 
+df_total_ac_leeds %>% 
+  filter(is.na(time)) %>% 
+  nrow()
 
-  
-  
-```{r #df_total_ac_leeds_cleaned}
-
-
-
-# There are 5 NAs in the column 'time'. We need to deal with this since we will be analysing accidents by time of hour.
-
-# What is the median time of accident (in hours) in each year?
+# Determine the median time of accident (in hours) for non-missing records
 df_total_ac_leeds %>% 
   filter(!is.na(time)) %>% 
   mutate(year = year(date),
@@ -271,11 +227,98 @@ df_total_ac_leeds %>%
   summarise(median(time_hour))
 
 # The median time of accidents (in hours) is the 15th hour, or 3.00-4.00pm. Therefore, it would be reasonable to impute the 5 missing NAs with 15 as the time of hour.
-
-# Replace the 5 NA values with the median value of time_hour, 15.
 df_total_ac_leeds <-
   df_total_ac_leeds %>% # Start with the main dataframe
-  replace_na(list(time = "15:00")) %>% # Replace the NA values with median time
+  replace_na(list(time = "15:00")) # Replace the NA values with median time
+
+```
+
+
+```{r #pre-process_3}
+
+### 3. MISSING VALUES IN 'LSOA_OF_ACCIDENT_LOCATION' COLUMN  ###
+
+# There are 58 NAs in the column 'lsoa_of_accident_location'. 
+df_total_ac_leeds %>% 
+  filter(is.na(lsoa_of_accident_location)) %>% 
+  nrow()
+
+# Plot these 58 accident location and lsoa boundaries data.
+missing_lsoa <- 
+  df_total_ac_leeds %>% 
+  filter(is.na(lsoa_of_accident_location)) %>% 
+  format_sf()
+
+lsoa_boundaries = st_read("Data/england_lsoa_ru_classn_2011.shp")
+
+tmap_mode("view")
+tm_shape(lsoa_boundaries) + 
+  tm_polygons(alpha=0.3) +
+  tm_shape(missing_lsoa) + 
+  tm_dots(size=0.2)
+
+# Manually extract the accident index of these 58 locations...
+a1 <- c("20141316H1029", "20151328E1461", "2014130018623", "20171346E0216",
+        "2014130030345", "2014131830367", "20141318V0571", "20151325L0873",
+        "20141312I0039", "2014130048209", "2014130043327", "20171349E0197",
+        "2014130001153", "20171343E0213", "20171341E0023", "20141318G0660",
+        "2014130004811", "20151328D1274", "20151327M1604", "20141317L1112",
+        "2014131351484", "20171342E0246", "20151326R0374", "20141317O1333",
+        "20141312H1210", "2014130008934", "2014131590760", "2015132860986",
+        "20151321A0339", "2014130047033", "2014130050974", "2014130033332",
+        "2014130035786", "2014131770761", "20171343E0234", "2014131730978",
+        "2014130034085", "2014131BH1330", "2015132AI0812", "2014130007139",
+        "2014130055061", "2015132CQ0615")
+
+# ... and assign it to a LSOA
+a2 <- c("E01011578", "E01011580", "E01011457", "E01011465", "E01011462", "E01011687",
+        "E01011381", "E01011381", "E01011558", "E01011718", "E01011407", "E01011296",
+        "E01011396", "E01011302", "E01011411", "E01011628", "E01032495", "E01011468",
+        "E01011368", "E01011523", "E01032503", "E01011610", "E01011738", "E01011529",
+        "E01011366", "E01011677", "E01011677", "E01011293", "E01011481", "E01033005",
+        "E01011446", "E01011443", "E01032946", "E01011415", "E01011423", "E01011430",
+        "E01011430", "E01011422", "E01011435", "E01033006", "E01011422", "E01011427")
+
+# Create a dataframe
+missing_df <- 
+  data.frame(accident_index=a1, lsoa_of_accident_location=a2) %>% # Create a dataframe
+  mutate(accident_index = as.character(accident_index)) %>% # Convert to character class
+  mutate(lsoa_of_accident_location = as.character(lsoa_of_accident_location)) # Convert to character class  
+
+
+df_total_ac_leeds %>% 
+  filter(is.na(lsoa_of_accident_location)) %>% 
+  
+
+```
+
+
+
+```{r #pre-process_4}
+
+
+```
+
+
+
+```{r #pre-process_5}
+
+
+```
+
+
+
+```{r #pre-process_6}
+
+
+```
+
+
+  
+```{r #df_total_ac_leeds_cleaned}
+
+
+
   mutate(year = year(date), # Extract the year from the 'date' column  
          month = month(date, label = TRUE), # Extract the month from the 'date' column
          day = day(date), # Extract the day from the 'date' column
@@ -327,20 +370,7 @@ df_total_ac_leeds %>% # Start with the main dataframe
   distinct(accident_index, .keep_all = TRUE) %>% # Only keep records of distinct accidents
   filter(!is.na(lsoa_of_accident_location)) # There are 42 records with NAs in the lsoa column. We will remove them. 
 
- [1] "20141316H1029" "20151328E1461" "2014130018623" "20171346E0216" "2014130030345" "2014131830367"
- [7] "20141318V0571" "20151325L0873" "20141312I0039" "2014130048209" "2014130043327" "20171349E0197"
-[13] "2014130001153" "20171343E0213" "20171341E0023" "20141318G0660" "2014130004811" "20151328D1274"
-[19] "20151327M1604" "20141317L1112" "2014131351484" "20171342E0246" "20151326R0374" "20141317O1333"
-[25] "20141312H1210" "2014130008934" "2014131590760" "2015132860986" "20151321A0339" "2014130047033"
-[31] "2014130050974" "2014130033332" "2014130035786" "2014131770761" "20171343E0234" "2014131730978"
-[37] "2014130034085" "2014131BH1330" "2015132AI0812" "2014130007139" "2014130055061" "2015132CQ0615"
 
- [1] "E01011578" "E01011580" "E01011457" "E01011465" "E01011462" "E01011687" "E01011381" "E01011381"
- [9] "E01011558" "E01011718" "E01011407" "E01011296" "E01011396" "E01011302" "E01011411" "E01011628"
-[17] "E01032495" "E01011468" "E01011368" "E01011523" "E01032503" "E01011610" "E01011738" "E01011529"
-[25] "E01011366" "E01011677" "E01011677" "E01011293" "E01011481" "E01033005" "E01011446" "E01011443"
-[33] "E01032946" "E01011415" "E01011423" "E01011430" "E01011430" "E01011422" "E01011435" "E01033006"
-[41] "E01011422" "E01011427"
 
 
 # Finally, write the cleaned dataset into a .csv file.
@@ -1608,4 +1638,51 @@ include_graphics("Figures/Figure_4.png")
 
 ```
 
+### Recovered
+
+```{r}
+
+(figure_8 <-
+#tm_basemap(leaflet::providers$Esri.WorldStreetMap, alpha = 0.5) +
+tm_shape(r2) +
+#tm_shape(sf_top10_vru_lines) +
+#tm_lines("cas_type", palette = "Set1") +
+tm_lines("index", popup.vars = c("cas_type", "index"), palette = "Set1", lwd = 2, title.col = c("Casualty Types")) +
+tm_shape(sf_top10_vru_points) +
+tm_dots("cas_type", palette = "Set1", size = 0.02, legend.show = FALSE))
+stray_linestring_idx <- c(135.00, 462.98, 771.91, 4.11, 733.95, 339.56)
+r2 <-
+r1 %>%
+filter(!(index %in% stray_linestring_idx)) %>%
+st_cast(to = "MULTILINESTRING")
+(figure_8 <-
+#tm_basemap(leaflet::providers$Esri.WorldStreetMap, alpha = 0.5) +
+tm_shape(r2) +
+#tm_shape(sf_top10_vru_lines) +
+#tm_lines("cas_type", palette = "Set1") +
+tm_lines("index", popup.vars = c("cas_type", "index"), palette = "Set1", lwd = 2, title.col = c("Casualty Types")) +
+tm_shape(sf_top10_vru_points) +
+tm_dots("cas_type", palette = "Set1", size = 0.02, legend.show = FALSE))
+stray_linestring_idx <- c(135.00, 462.98, 771.91, 4.11, 733.95, 339.56, 972.43, 146.42, 614.95,
+r2 <-
+r1 %>%
+filter(!(index %in% stray_linestring_idx)) %>%
+st_cast(to = "MULTILINESTRING")
+(figure_8 <-
+#tm_basemap(leaflet::providers$Esri.WorldStreetMap, alpha = 0.5) +
+tm_shape(r2) +
+#tm_shape(sf_top10_vru_lines) +
+
+
+
+stray_linestring_idx <- c(135.00, 462.98, 771.91, 4.11, 733.95, 339.56, 972.43, 146.42, 614.95,
+138.91, 621.81, 410.51, 692.91, 387.50, 123.86, 555.08, 594.27, 788.47,
+31.76, 514.97, 526.27, 815.77, 346.13, 203.04, 549.28, 848.11, 606.83,
+756.10, 259.65, 288.01, 531.68, 702.98, 721.31, 567.75, 819.68, 381.42,
+752.44, 568.34, 931.10, 117.77, 405.36, 831.79, 264.49, 299.12, 937.77,
+421.81, 244.31, 391.23, 192.81, 568.57, 202.18, 479.54, 826.33, 660.53,
+72.29, 58.03, 138.39, 313.52, 138.39, 718.61, 950.72, 953.76, 937.63,
+72.63, 800.92, 727.76, 199.91)
+
+```
 
