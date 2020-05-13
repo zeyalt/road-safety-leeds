@@ -625,11 +625,7 @@ We created two heatmaps---one for number of casualties by months, and another fo
 
 ## 5.2 Results and Discussions
 
-The resulting heatmaps are shown in Figures 5 and 6. These heatmaps are extremely insightful in this analysis because they communicate the most accident-prone times in an effective way using the darker shades.
-#stopped here
-Figure 5 shows that November, December and January were relatively more 
-
-seemed to be dangerous months for cyclists. During these winter months, the weather is typically colder, and the roads wet and slippery. Cyclists are exposed to such harsh weather elements and these conditions make them more susceptible to accidents. On the other hand, the safest months for cyclist are April and August. 
+The resulting heatmaps are shown in Figures 5 and 6. These heatmaps are extremely insightful in this analysis because they communicate the most accident-prone times for pedestrians and cyclists effectively using the darker shades. Figure 5 shows that there were more pedestrian casualties in the months of November, December and January than other months. The weather is typically more wet and harsh during these winter months and the roads more slippery. These factors could have affected drivers' judgements, resulting in more accidents with pedestrians. The second Thursday of July was unusually very accident-prone for pedestrians. On the flip side, April and August seemed to be relatively safer months for pedestrians. 
 
 ```{r #df_cal_hm}
 
@@ -683,6 +679,10 @@ include_graphics("Figures/Figure_5.png")
 
 ```
 
+For cyclists, mid-April to October recorded more casualties than the rest of the year. These months are also spring and summer months in the UK. In particular, the last two weeks of September were noticeably most accident-prone. This period coincides with the beginning of the academic year for the universities in Leeds, which also could mean an increase in the cycling population, be it due to students or staff. Unlike pedestrian casualties, cyclist casualties were less prone to accidents in the winter months. This is reasonable because the weather during these months is typically more rainy and windy, making it less favourable for outdoor cycling.
+
+Figure 6 reveals temporal patterns in terms of hours of the day and day of the week. A common pattern across both pedestrians and cyclists is that the casualty numbers were very low during the early hours of day. However, there were more pedestrian casualties between midnight and 4.00am on weekends than on weekdays. A plausible explanation is that more individuals might go out for social gatherings on Friday and Saturday nights till early hours the next day.
+
 ```{r df_vru_leeds, eval=TRUE}
 
 # Create a data frame for unique number of accidents involving pedestrians in Leeds from 2014-2018
@@ -723,8 +723,6 @@ break_hour <- seq(from = 0, to = 24, by = 4)
   scale_fill_distiller(palette = "YlOrRd", direction = 1, name = "Number\nof Casualties") +
   scale_x_continuous(breaks = break_hour,
                      labels = c("00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00")) +
-  # scale_x_reverse(breaks = break_hour,
-  #              labels = c("00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00")) +
   theme_bw() + theme_minimal() + 
   # facet_grid(~cas_type) +
   facet_wrap(vars(cas_type), 2) +
@@ -744,21 +742,17 @@ include_graphics("Figures/Figure_6.png")
 
 ```
 
+Figure 6 reveals that there were two distinct accident-prone periods for both pedestrians and cyclists. These periods are on weekdays and reasonably coincide with the typical work and school hours. Pedestrians were more accident-prone on weekday evenings, that is, 3.00pm to 6.00pm, than on weekday mornings. The most dangerous hour appeared to be from 3.00pm to 4.00pm. The converse is true for cyclists. There had been more cyclist casualties on weekday mornings, 7.00am to 9.00am, than on weekday evenings. There were particularly high numbers of cyclist casualties between 8.00am and 9.00am, especially on Wednesdays. 
 
+Another difference between both groups was that the polarisation of the morning and evening accident-prone periods on weekdays was less distinct for pedestrians than for cyclists. This means that there were more pedestrian casualties between mornings and evenings on weekdays than cyclist casualties. 
 
-
-For pedestrians, the last two weeks of the months of September seem to have recorded most accidents. This time also coincides with the beginning of the academic year for University students, which means this is the time of the year in Leeds when there is an increase in the  population of either returning students or new international students.   Unlike cyclists, the winter months tend to be relatively safer for pedestrians, which seems reasonable because people might tend to go out less due to the cold weather. 
-
-Figure 7 reveals temporal patterns in terms of hours of day and day of the week. A common pattern across both groups is that the numbers of accidents were low during the early hours of day. This is reasonable because these are generally the non-waking hours. Notwithstanding, there were more accidents involving pedestrians between midnight and 4.00am on weekends than on weekdays. A plausible explanation is that more individuals might go out to meet their friends and celebrate the weekend on Friday and Saturday nights till early hours the next day.
-
-Cyclists seemed to be most at risk of getting into accidents during two distinct periods on weekdays -- 7.00am to 9.00am and 4.00pm to 6.00pm. This could be because many individuals choose to cycle to and fro work or school. These accident-prone timings are reasonably consistent with typical work or school hours on weekdays. For pedestrian, the most accident-prone timings on weekdays are between 3.00pm and 6.00pm. Interestingly, pedestrians seemed to be particularly accident-prone on Saturdays between 4.00pm and 5.00pm.
 
 # 6. The 'Where': Geospatial Distribution of Accidents 
 
-In this section, we will analyse the geospatial distribution of accidents involving pedestrians and cyclists, and assess if there were any areas in Leeds which are particularly accident-prone for each group. Such analyses have significant real-world implications as they can influence policy-making. Local councils and authorities are better informed in assessing and prioritising resources for road infrastructure improvement works.  
+Having gained insights into the temporal distribution of pedestrian and cyclist casyalties, we will, in this section, analyse the data geospatially. The key question to be addressed in this section is, "Where were the most accident-prone locations?" Such analyses have significant real-world implications. For instance, they enable local authorities to better prioritise and allocate resources for road infrastructure improvement works.  
 
 ## 6.1 Methodology
-
+## stopped here.
 The raw datasets from the `stats19` package contain the LSOA of the accident location. To analyse the accident rates by LSOA, we needed data specifying the boundaries of the LSOAs. This data was obtained from the the UK Data Service (cite) and subsequently joined with our cleaned version of Leeds accident dataset. The resulting dataset contains accident counts for pedestrians and cyclists in terms of absolute numbers. 
 
 Whilst absolute numbers are useful in understanding the scale of accident rates in a region, our assessment was normalising the absolute numbers against the average number of accidents for each group would be more informative in identifying regions of concern, as well as those with encouraging accident numbers. We will refer to these normalised values as the "accident index". Accident indices range between -1 and 1; a negative value means that a region has below-average accident counts for that casualty group and a positive value means otherwise. An accident index value of around zero suggests that the region is close to the average. We then plotted thematic maps with a divergent colour scale (discuss more to rationalise this viz).
@@ -1535,6 +1529,9 @@ The first OSM boundary returned by OSM may not be the official boundary used by 
 
 Section 4: limited demographic information about accident victims. 
 
+
+A potential extension of this analysis is to break down these temporal patterns by regions or roads. This could potentially provide further insights on the spatio-temporal distribution of accidents. For instance, a particular stretch of road could have been more accident-prone for either pedestrians or cyclists during a specific time of the day or day of the week. Such information is useful for local authorities to not only implement targeted road safety education but also perform traffic enforcement duties to improve the overall safety.
+
 # 10. Conclusions
 
 Besides road safety, another transport problem that One of the transport problems that Leeds faces is congestion. Based on a global traffic scorecard published in 2018, Leeds ranked 9th amongst the most congested urban areas in the UK (cite 1). One of the ways to tackle this issue is to encourage more people to adopt active modes of transports, that is, walking and cycling. This is also in line with the UK Government's ambitions to "make cycling and walking people's natural choices for shorter journeys or parts of a longer journey", a commitment made in 2017. It also set out an action plan to 
@@ -1714,3 +1711,18 @@ stray_linestring_idx <- c(135.00, 462.98, 771.91, 4.11, 733.95, 339.56, 972.43, 
 
 ```
 
+### JUNK
+
+
+seemed to be dangerous months for cyclists. During these winter months, the weather is typically colder, and the roads wet and slippery. Cyclists are exposed to such harsh weather elements and these conditions make them more susceptible to accidents. On the other hand, the safest months for cyclist are April and August. 
+
+For pedestrians, the last two weeks of the months of September seem to have recorded most accidents. 
+
+this is the time of the year in Leeds when there is an increase in the  population of either returning students or new international students.   Unlike cyclists, the winter months tend to be relatively safer for pedestrians, which seems reasonable because people might tend to go out less due to the cold weather.
+
+WHEN: 
+Some inferences can be made from this observation regarding people's travel behaviours. 
+
+It can be inferred that people cycle for the specific purposes of commuting to work or school, which could explain why there were lesser accidents during work or school hours. On the contrary, there were more pedestrian casualties during work or school hours because 
+
+In addition, pedestrians seemed to be fairly accident-prone on weekends, particularly accident-prone on Saturdays between 4.00pm and 5.00pm.
