@@ -552,12 +552,11 @@ include_graphics("Figures/Figure_3.png")
 
 # 4. The 'Who': Profile of Accident Casualties
 
-
-In this section, we focus on the question, "Who were most at risk of accidents?". In answering this question, the approach was to understand the profiles of accident casualties based on past data. 
+Having pre-processed the data and performed EDA, we will analyse it to gain insights on accidents involving pedestrians and cyclists. The focus of this section is answering the question, "Who were most at risk of accidents?" In answering this question, the approach was to understand the profiles of accident casualties based on past data. 
 
 ## 4.1 Methodology
 
-In the interest of protecting data privacy, limited demographic information about accident victims was provided in the dataset. Nevertheless, using available information, we plotted histograms and boxplots to analyse the distributions of pedestrian and cycHavinglist casualties by age and gender. (why histograms and boxplots?) 
+Limited demographic information about accident victims was available in the dataset, presumably due to the need to protect their privacy. The only demographic information available were age and gender, with which we plotted histograms and boxplots. Histograms provide useful insights into the distributions of casualties by age and gender, whereas boxplots allow us to graphically visualise the median and spread of the data. These plots are shown in Figure 4.
 
 ## 4.2 Results and Discussions
 
@@ -613,7 +612,7 @@ include_graphics("Figures/Figure_4.png")
 
 ```
 
-Despite having limited demographic information, the plots in Figure 5 nonetheless provide valuable insights about the profiles of accident casualties. For cyclists, there were significantly more male casualties than female. The distribution of male cyclist casualties appears to be bimodal, that is, having two peaks -- one at around 24 years old and another at around 40. The former could be attributed to male student population at the universities who choose to cycle to school, whereas the latter could be predominantly avid sports cyclists who cycle for either competitive or recreational purposes. The peak age for female cyclist casualties is less apparent, although it seems to be around mid-20s. One similarity is that the age distributions for both male and female cyclist casualties taper off at 75. 
+Several useful insights can be extracted from Figure 4. For cyclists, there were significantly more male casualties than female. The distribution of male cyclist casualties appeared to be bimodal, that is, having two peaks---one at around 24 years old and another at around 40. The former could be attributed to male student population at the universities who cycle to school, whereas the latter could be more mature male adults who cycle to work, or cycle for competitive or recreational purposes. The peak age for female cyclist casualties was less apparent, although it seemed to be around mid-20s. One similarity is that the age distributions for both male and female cyclist casualties taper off at 75. 
 
 Unlike cyclist casualties, pedestrian casualties had more equal distribution of male and female. The age distributions for male and female pedestrian casualties are both positively skewed, with peaks at 12 and 14 years respectively. These could be mainly high school students who get into accidents during their journeys either to or from schools, suggesting that more can be done by parents and schools to educate young children on road safety. The histogram also shows that, unlike cyclists, the age distribution only tapers off in the late-80s or 90s. This implies that there were many elderly pedestrians who were susceptible to accidents. 
 
