@@ -216,7 +216,7 @@ rowSums(is.na(df_total_ac_leeds))
 # There are 5 NAs in the column 'time'. 
 df_total_ac_leeds %>% 
   filter(is.na(time)) %>% 
-  nrow()
+  nrow() # Output: 5
 
 # Determine the median time of accident (in hours) for non-missing records
 df_total_ac_leeds %>% 
@@ -231,6 +231,11 @@ df_total_ac_leeds <-
   df_total_ac_leeds %>% # Start with the main dataframe
   replace_na(list(time = "15:00")) # Replace the NA values with median time
 
+# Sanity check
+df_total_ac_leeds %>% 
+  filter(is.na(time)) %>% 
+  nrow # Output: 0
+
 ```
 
 
@@ -241,7 +246,7 @@ df_total_ac_leeds <-
 # There are 58 NAs in the column 'lsoa_of_accident_location'. 
 df_total_ac_leeds %>% 
   filter(is.na(lsoa_of_accident_location)) %>% 
-  nrow()
+  nrow() # Output: 58
 
 # Plot these 58 accident location and lsoa boundaries data.
 missing_lsoa <- 
@@ -249,13 +254,13 @@ missing_lsoa <-
   filter(is.na(lsoa_of_accident_location)) %>% 
   format_sf()
 
-lsoa_boundaries = st_read("Data/england_lsoa_ru_classn_2011.shp")
-
-tmap_mode("view")
-tm_shape(lsoa_boundaries) + 
-  tm_polygons(alpha=0.3) +
-  tm_shape(missing_lsoa) + 
-  tm_dots(size=0.2)
+# lsoa_boundaries = st_read("Data/england_lsoa_ru_classn_2011.shp")
+# 
+# tmap_mode("view")
+# tm_shape(lsoa_boundaries) + 
+#   tm_polygons(alpha=0.3) +
+#   tm_shape(missing_lsoa) + 
+#   tm_dots(size=0.2)
 
 # Manually extract the accident index of these 58 locations...
 a1 <- c("20141316H1029", "20151328E1461", "2014130018623", "20171346E0216",
@@ -285,69 +290,73 @@ missing_df <-
   mutate(accident_index = as.character(accident_index)) %>% # Convert to character class
   mutate(lsoa_of_accident_location = as.character(lsoa_of_accident_location)) # Convert to character class  
 
+# Create a subset of original dataframe for records with missing LSOA and fill them with the assigned LSOA
+df_total_ac_leeds_missing <- 
+df_total_ac_leeds %>% 
+  filter(is.na(lsoa_of_accident_location)) %>% # Filter records where LSOA is missing
+  left_join(missing_df, by = "accident_index") %>% # Join these records with missing_df
+  mutate(lsoa_of_accident_location.x = lsoa_of_accident_location.y) %>% # Fill missing LSOA with assigned LSOA codes 
+  select(-lsoa_of_accident_location.y) %>% # Remove this column
+  dplyr::rename(lsoa_of_accident_location = lsoa_of_accident_location.x)
+  
+# Combine with original dataframe 
+df_total_ac_leeds <-
+  df_total_ac_leeds %>% 
+  filter(!is.na(lsoa_of_accident_location)) %>% # Filter records where LSOA is not missing
+  bind_rows(df_total_ac_leeds_missing) # Concatenate with dataframe for the 58 records
 
+# Sanity check
 df_total_ac_leeds %>% 
   filter(is.na(lsoa_of_accident_location)) %>% 
-  
+  nrow # Output: 0
 
 ```
-
-
 
 ```{r #pre-process_4}
 
+### 4. EXTRACT YEAR, MONTH, DAY, TIME AND HOUR ### 
 
-```
-
-
-
-```{r #pre-process_5}
-
-
-```
-
-
-
-```{r #pre-process_6}
-
-
-```
-
-
-  
-```{r #df_total_ac_leeds_cleaned}
-
-
-
+df_total_ac_leeds <-
+df_total_ac_leeds %>% 
   mutate(year = year(date), # Extract the year from the 'date' column  
          month = month(date, label = TRUE), # Extract the month from the 'date' column
          day = day(date), # Extract the day from the 'date' column
          time_hour = hour(hm(time)), # Extract the hour from the 'time' column
          time_minute = minute(hm(time))) %>% # Extract the minute from the 'time' column
   group_by(year, month, day, time_hour, time_minute) %>% # Group the accidents in chronological order
-  arrange(year, month, day, time_hour, time_minute) %>% # Arrange the accidents in chronological order 
-  select(c("accident_index", "date", "year", "month", "day", "time", "time_hour", 
-           "time_minute", "day_of_week", "accident_severity", "number_of_casualties", 
-           "casualty_severity", "casualty_type", "casualty_class", "sex_of_casualty", 
-           "age_of_casualty", "first_road_class", "road_type", "speed_limit", "second_road_class", 
-           "pedestrian_location", "pedestrian_movement", "location_easting_osgr", "location_northing_osgr", 
-           "lsoa_of_accident_location", "number_of_vehicles", "first_road_class", "road_type", 
-           "speed_limit", "junction_detail", "light_conditions", "weather_conditions", "road_surface_conditions")) # Select the desired columns only
-  
-# Convert relevant columns to factor class
-df_total_ac_leeds <-
-  df_total_ac_leeds %>% 
-    mutate(day_of_week = factor(day_of_week, 
-                                levels = c("Sunday", "Monday", "Tuesday", "Wednesday", 
-                                           "Thursday", "Friday", "Saturday"))) %>% 
-    mutate(accident_severity = factor(accident_severity, 
-                                      levels = c("Slight", "Serious", "Fatal"))) %>% 
-    mutate(casualty_severity = factor(casualty_severity, 
-                                      levels = c("Slight", "Serious", "Fatal"))) %>% 
-    mutate(sex_of_casualty = factor(sex_of_casualty,
-                                    levels = c("Female", "Male"))) 
+  arrange(year, month, day, time_hour, time_minute) # Arrange the accidents in chronological order 
 
-# Regroup casualty types into six main categories
+```
+
+```{r #pre-process_5}
+
+### 5. SELECT DESIRED COLUMNS ###
+
+# Define desired columns
+desired_cols <- c("accident_index", "date", "year", "month", "day", 
+                  "time", "time_hour", "time_minute", "day_of_week",
+                  "accident_severity", "number_of_casualties", 
+                  "casualty_severity", "casualty_type", "casualty_class",
+                  "sex_of_casualty", "age_of_casualty", "first_road_class",
+                  "road_type", "speed_limit", "second_road_class", 
+                  "pedestrian_location", "pedestrian_movement",
+                  "location_easting_osgr", "location_northing_osgr", 
+                  "lsoa_of_accident_location", "number_of_vehicles",
+                  "first_road_class", "road_type", 
+                  "speed_limit", "junction_detail", "light_conditions",
+                  "weather_conditions", "road_surface_conditions")
+
+df_total_ac_leeds <-
+df_total_ac_leeds %>% 
+  select(all_of(desired_cols))
+
+```
+
+
+```{r #pre-process_6}
+
+### 6. REGROUP CASUALTY TYPES ###
+
 cas_type <- unique(df_total_ac_leeds$casualty_type)
 
 df_total_ac_leeds <-
@@ -364,14 +373,41 @@ df_total_ac_leeds %>% # Start with the main dataframe
   mutate(cas_type = factor(cas_type, levels = c("Pedestrian", "Cyclist", "Motorcyclist and pillion",
                                                 "Car occupant", "Bus and goods vehicle occupant", "Others"))) # Convert cas_type to factor class and specify the levels
 
-# Out of 11943 records, there are many which correspond to the same accident event. Therefore, we need to filter out the duplicates. 
+```
+
+
+
+```{r #pre-process_7}
+
+### 7. CLASS CONVERSION ###
+
+df_total_ac_leeds <-
+df_total_ac_leeds %>% 
+  mutate(day_of_week = factor(day_of_week, 
+                              levels = c("Sunday", "Monday", "Tuesday", "Wednesday", 
+                                         "Thursday", "Friday", "Saturday"))) %>% 
+  mutate(accident_severity = factor(accident_severity, 
+                                    levels = c("Slight", "Serious", "Fatal"))) %>% 
+  mutate(casualty_severity = factor(casualty_severity, 
+                                    levels = c("Slight", "Serious", "Fatal"))) %>% 
+  mutate(sex_of_casualty = factor(sex_of_casualty,
+                                  levels = c("Female", "Male"))) 
+
+
+```
+
+```{r #df_total_ac_leeds_cleaned}
+
+# Out of 11943 records, there are many which correspond to the same accident event. 
+
+# Create a dataframe with distinct accidents
 df_total_ac_leeds_cleaned = 
 df_total_ac_leeds %>% # Start with the main dataframe 
-  distinct(accident_index, .keep_all = TRUE) %>% # Only keep records of distinct accidents
-  filter(!is.na(lsoa_of_accident_location)) # There are 42 records with NAs in the lsoa column. We will remove them. 
+  distinct(accident_index, .keep_all = TRUE) # Only keep records of distinct accidents
 
+```
 
-
+```{r #write_as_csv}
 
 # Finally, write the cleaned dataset into a .csv file.
 write.csv(df_total_ac_leeds, "Data/df_total_ac_leeds.csv")
@@ -379,28 +415,23 @@ write.csv(df_total_ac_leeds_cleaned, "Data/df_total_ac_leeds_cleaned.csv")
 
 ```
 
-Out of 48 variables, 28 were selected for subsequent analyses. We used functions in the lubridate package
-to extract the year, month and day from the date variable. As some variables were categorical but of the
-character class, they were converted to the factor class. There were originally 21 unique types of casualties
-in the dataset, but since our analyses would not require such fine-grained details, they were recategorised
-into six main groups. There were also multiple records corresponding to a single accident event, possibly
-due to accidents with multiple casualties. These duplicates were filtered out.    
+Out of 48 variables, 28 were selected for subsequent analyses. We used functions in the lubridate package to extract the year, month and day from the date variable. As some variables were categorical but of the character class, they were converted to the factor class. There were originally 21 unique types of casualties in the dataset, but since our analyses would not require such fine-grained details, they were recategorised into six main groups. There were also multiple records corresponding to a single accident event, possibly due to accidents with multiple casualties. These duplicates were filtered out.    
 
 ```{r load_df_total_ac_leeds_cleaned, eval=TRUE}
 
-df_total_ac_leeds <- read.csv("Data/df_total_ac_leeds.csv")
-df_total_ac_leeds_cleaned <- read.csv("Data/df_total_ac_leeds_cleaned.csv")
+df_total_ac_leeds <- 
+  read.csv("Data/df_total_ac_leeds.csv") %>% 
+  select(-X)
+
+df_total_ac_leeds_cleaned <- 
+  read.csv("Data/df_total_ac_leeds_cleaned.csv") %>% 
+  select(-X)
 
 ```
 
 ## 3.3 Exploratory Data Analysis
 
-A key part of the EDA is to extract summary statistics and general trends from the dataset. We used
-the summary() function to obtain a summary of numerical variables, such as age_of_casualty and
-number_of_vehicles. We plotted a time-series graph, shown in Figure 1, to understand the trend of
-monthly number of accidents in Leeds from 2014 to 2018. To some extent, there was a seasonal pattern to
-the occurrences of accidents in Leeds during this period. The number of accidents typically increased at the
-beginning of the year, fluctuated over the next few months, and decreased towards the end of the year. 
+A key part of the EDA is to extract summary statistics and general trends from the dataset. We used the `summary()` function to obtain a summary of numerical variables, such as `age_of_casualty` and `number_of_vehicles`. We plotted a time-series graph, shown in Figure 1, to understand the trend of monthly number of accidents in Leeds from 2014 to 2018. To some extent, there was a seasonal pattern to the occurrences of accidents in Leeds during this period. The number of accidents typically increased at the beginning of the year, fluctuated over the next few months, and decreased towards the end of the year. 
   
 ```{r #eda2}
 
@@ -442,7 +473,7 @@ df_total_ac_leeds_cleaned %>%
   ggplot(aes(x = year, y = count, fill = year)) +
   geom_col(show.legend = FALSE, width = 0.6) +
   scale_color_discrete(palette = "Paired") +
-  labs(subtitle="Number of Accidents", x = "Year", y = "Number of Accidents") + 
+  labs(x = "Year", y = "Number of Accidents") + 
   geom_text(aes(label = count), vjust=-0.30, size=3)) 
 
 figure_2a + ggsave("Figures/Figure_2a.png", width = 6, height = 4)
@@ -459,7 +490,7 @@ df_total_ac_leeds %>%
   ggplot(aes(x = year, y = count, fill = year)) +
   geom_col(show.legend = FALSE, width = 0.6) +
   scale_color_discrete(palette = "Paired") +
-  labs(subtitle="Number of Casualties", x = "Year", y = "Number of Casualties") + 
+  labs(x = "Year", y = "Number of Casualties") + 
   geom_text(aes(label = count), vjust=-0.30, size=3))
 
 figure_2b + ggsave("Figures/Figure_2b.png", width = 6, height = 4)
@@ -482,19 +513,16 @@ include_graphics("Figures/Figure_2.png")
 
 ```
 
-Figure 2 shows the overall numbers of accidents and casualties from 2014 to 2018. Both sub-figures follow
-similar trends but the casualty numbers were higher than accident counts plausibly because of accidents
-with multiple casualties. From Figure 2, it appeared that the roads in Leeds are becoming safer, with steady
-declines in the numbers of accidents and casualties since 2015. 2018 saw 25% less accidents than 2015.
-A breakdown by severity of accidents reveals further insights, as shown in Figure 3. The decline in overall
-accident numnbers since 2015, as we saw in Figure 2, was mainly contributed by decreases in slight accidents,
-and to a lesser extent, serious accidents. Fatal accidents, however, had been increasing trend since 2016.
+Figure 2 shows the overall numbers of accidents and casualties from 2014 to 2018. Both sub-figures follow similar trends but the casualty numbers were higher than accident counts plausibly because of accidents with multiple casualties. From Figure 2, it appeared that the roads in Leeds are becoming safer, with steady
+declines in the numbers of accidents and casualties since 2015. 2018 saw 25% less accidents than 2015. A breakdown by severity of accidents reveals further insights, as shown in Figure 3. The decline in overall accident numnbers since 2015, as we saw in Figure 2, was mainly contributed by decreases in slight accidents, and to a lesser extent, serious accidents. Fatal accidents, however, had been increasing since 2016.
 
 ```{r #figure_3}
  
 # Breakdown of each year by accident severity
 (figure_3 <-
   df_total_ac_leeds_cleaned %>% 
+  mutate(accident_severity = factor(accident_severity, 
+                                    levels = c("Slight", "Serious", "Fatal"))) %>% 
   # group_by(accident_index) %>% # Group by accident index
   # distinct() %>% # Only distinct accidents 
   group_by(year, accident_severity) %>% 
@@ -522,20 +550,20 @@ include_graphics("Figures/Figure_3.png")
 
 ```
 
-
 # 4. The 'Who': Profile of Accident Casualties
 
-In this section, we focus on the question, "who were most at risk of accidents?". In answering this question, the approach was to understand the profiles of accident casualties based on past data. 
+
+In this section, we focus on the question, "Who were most at risk of accidents?". In answering this question, the approach was to understand the profiles of accident casualties based on past data. 
 
 ## 4.1 Methodology
 
-In the interest of protecting data privacy, limited demographic information about accident victims was provided in the dataset. Nevertheless, using available information, we plotted histograms and boxplots to analyse the distributions of pedestrian and cyclist casualties by age and gender. (why histograms and boxplots?) 
+In the interest of protecting data privacy, limited demographic information about accident victims was provided in the dataset. Nevertheless, using available information, we plotted histograms and boxplots to analyse the distributions of pedestrian and cycHavinglist casualties by age and gender. (why histograms and boxplots?) 
 
 ## 4.2 Results and Discussions
 
-```{r #figure_5a}
+```{r #figure_4a}
 
-(figure_5a <- 
+(figure_4a <- 
 df_total_ac_leeds %>% 
   filter(cas_type == "Pedestrian" | cas_type == "Cyclist")%>% 
   ggplot(aes(x = age_of_casualty, fill = sex_of_casualty)) +
@@ -547,13 +575,13 @@ df_total_ac_leeds %>%
   theme(legend.position = "bottom", 
         legend.title = element_blank()))
 
-figure_5a + ggsave("Figures/Figure_5a.png", width = 6, height = 4)
+figure_4a + ggsave("Figures/Figure_4a.png", width = 6, height = 4)
 
 ```
 
-```{r #figure_5b}
+```{r #figure_4b}
 
-(figure_5b <- 
+(figure_4b <- 
 df_total_ac_leeds %>% 
   filter(cas_type == "Pedestrian" | cas_type == "Cyclist") %>%
   ggplot(aes(x = sex_of_casualty, y = age_of_casualty, fill = sex_of_casualty)) +
@@ -565,23 +593,23 @@ df_total_ac_leeds %>%
   theme(legend.position = "bottom", 
         legend.title = element_blank()))
 
-figure_5b + ggsave("Figures/Figure_5b.png", width = 6, height = 4)
+figure_4b + ggsave("Figures/Figure_4b.png", width = 6, height = 4)
 
 ```
 
-```{r #save_figure_5a_and_5b}
+```{r #save_figure_4a_and_4b}
 
-grid.arrange(figure_5a, figure_5b, nrow = 1, ncol = 2)
+grid.arrange(figure_4a, figure_4b, nrow = 1, ncol = 2)
 
-ggsave("Figures/Figure_5.png", 
-       arrangeGrob(figure_5a, figure_5b, nrow = 1, ncol = 2),
+ggsave("Figures/Figure_4.png", 
+       arrangeGrob(figure_4a, figure_4b, nrow = 1, ncol = 2),
        width = 12, height = 4)
 
 ```
 
-```{r display_figure_5, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Graphical summaries of profiles of pedestrian and cyclist casualties"}
+```{r display_figure_4, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Graphical summaries of profiles of pedestrian and cyclist casualties"}
 
-include_graphics("Figures/Figure_5.png")
+include_graphics("Figures/Figure_4.png")
 
 ```
 
@@ -622,10 +650,10 @@ df_cal_hm <- ddply(df_cal_hm, .(yearmonth), transform,
 
 ```
 
-```{r #figure_6}
+```{r #figure_5}
 
 # Calendar heat map
-(figure_6 <-
+(figure_5 <-
   df_cal_hm %>% 
   filter(cas_type == "Pedestrian" | cas_type == "Cyclist") %>% 
   group_by(month, monthweek, day_of_week, cas_type) %>% 
@@ -639,13 +667,13 @@ df_cal_hm <- ddply(df_cal_hm, .(yearmonth), transform,
   ylab("") +
   theme_bw() + theme_minimal())
 
-figure_6 + ggsave("Figures/Figure_6.png", width = 12, height = 3)
+figure_5 + ggsave("Figures/Figure_5.png", width = 12, height = 3)
 
 ```
 
-```{r display_figure_6, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Heatmap showing the number of pedestrian and cyclist accidents, by day and month"}
+```{r display_figure_5, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Heatmap showing the number of pedestrian and cyclist accidents, by day and month"}
 
-include_graphics("Figures/Figure_6.png")
+include_graphics("Figures/Figure_5.png")
 
 ```
 
@@ -667,9 +695,9 @@ df_cyc_leeds_accidents =
 
 ```
 
-```{r #figure_7}
+```{r #figure_6}
 
-(figure_7 <- 
+(figure_6 <- 
   df_total_ac_leeds_cleaned %>% 
   group_by(accident_index) %>% 
   distinct() %>% 
@@ -702,22 +730,13 @@ df_cyc_leeds_accidents =
         axis.text.x = element_text(angle = 90, vjust = 0.1, hjust = 1))) 
 
 # Save the plot
-figure_7 + ggsave("Figures/figure_7.png", width = 8, height = 4)
+figure_6 + ggsave("Figures/figure_6.png", width = 8, height = 4)
 
 ```
 
-```{r #save_figure_7a_and_7b}
+```{r display_figure_6, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Heatmap showing the number of pedestrian and cyclist accidents, by hour and day", out.width="60%"}
 
-# grid.arrange(legend, fig6, fig7, fig8, nrow = 1, ncol = 4, widths = c(0.9, 2.1, 2.1, 2.1))
-
-ggsave("Figures/Figure_7.png", arrangeGrob(figure_7a, figure_7b, nrow = 1, ncol = 2),
-       width = 8, height = 6)
-
-```
-
-```{r display_figure_7, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Heatmap showing the number of pedestrian and cyclist accidents, by hour and day", out.width="60%"}
-
-include_graphics("Figures/Figure_7.png")
+include_graphics("Figures/Figure_6.png")
 
 ```
 
@@ -802,11 +821,11 @@ sf_norm_cyc_by_lsoa = sf_norm_by_lsoa %>% filter(casualty == "cyclist")
 
 ```
 
-```{r #figure_8a}
+```{r #figure_7a}
 
 tmap_mode("view")
 
-(figure_8a <-
+(figure_7a <-
 tm_basemap(leaflet::providers$Esri.WorldStreetMap, alpha = 0.4) +
   tm_shape(lsoa_boundaries) +
   tm_polygons(col = "#B7D8E8", alpha = 0.6)+
@@ -815,9 +834,9 @@ tm_basemap(leaflet::providers$Esri.WorldStreetMap, alpha = 0.4) +
 
 ```
 
-```{r #figure_8b}
+```{r #figure_7b}
 
-(figure_8b <-
+(figure_7b <-
 tm_basemap(leaflet::providers$Esri.WorldStreetMap, alpha = 0.4) +
   tm_shape(lsoa_boundaries) +
   tm_polygons(col = "#B7D8E8", alpha = 0.6)+
@@ -826,14 +845,14 @@ tm_basemap(leaflet::providers$Esri.WorldStreetMap, alpha = 0.4) +
 
 ```
 
-```{r display_figure_8, eval=TRUE, echo=FALSE, include=TRUE, fig.show="hold", fig.cap="Geospatial distribution of accidents involving pedestrians (left) and cyclists (right) by LSOAs", out.width="47.5%"}
+```{r display_figure_7, eval=TRUE, echo=FALSE, include=TRUE, fig.show="hold", fig.cap="Geospatial distribution of accidents involving pedestrians (left) and cyclists (right) by LSOAs", out.width="47.5%"}
 
-include_graphics("Figures/figure_8a.png")
-include_graphics("Figures/figure_8b.png")
+include_graphics("Figures/figure_7a.png")
+include_graphics("Figures/figure_7b.png")
 
 ```
 
-Figure 8 shows thematic maps depicting the geospatial distribution of accident rates for pedestrians (left) and cyclists (right) by LSOA regions in Leeds. The LSOA that recorded the highest number of pedestrian accidents, and which has an accident index of 1, is E01033010. This region is shaded in the darkest shade of red in the left thematic map. This region corresponds to Leeds city centre and recorded a total of 103 pedestrian accidents over the five-year period. In fact, many other LSOAs in its immediate vicinity also had above-average accident indices. Since it is the city centre, the human pedestrian traffic at these regions would be higher than others. Closer analysis reveals that none of these 103 pedestrian accidents resulted in fatalities. In fact, 77 of them, or 75% were classified as "slight" accidents. Given that traffic congestion is not uncommon in the city centre, the speed of traffic would be moderate to slow, which means that it is less likely to cause serious injuries to pedestrians in accidents. 
+Figure 7 shows thematic maps depicting the geospatial distribution of accident rates for pedestrians (left) and cyclists (right) by LSOA regions in Leeds. The LSOA that recorded the highest number of pedestrian accidents, and which has an accident index of 1, is E01033010. This region is shaded in the darkest shade of red in the left thematic map. This region corresponds to Leeds city centre and recorded a total of 103 pedestrian accidents over the five-year period. In fact, many other LSOAs in its immediate vicinity also had above-average accident indices. Since it is the city centre, the human pedestrian traffic at these regions would be higher than others. Closer analysis reveals that none of these 103 pedestrian accidents resulted in fatalities. In fact, 77 of them, or 75% were classified as "slight" accidents. Given that traffic congestion is not uncommon in the city centre, the speed of traffic would be moderate to slow, which means that it is less likely to cause serious injuries to pedestrians in accidents. 
 
 The map on the right for cyclist accidents has more regions highlighted in dark red than the map for pedestrian accidents. There are four LSOA with accident indices greater than 0.80; one of them being E01033010 as well. In fact, these regions are close to one other, and they cover stretches of main arterial roads, such as Headingley Lane, Woodhouse Lane and Kirkstall Road, which links towards either the University or the city centre. A total of 141 accidents were recorded in these four LSOAs between 2014 and 2018. As with pedestrian accidents, none of these accidents were fatal and a vast majority resulted in slight injuries.       
 
@@ -1059,7 +1078,7 @@ sf_top10_vru_points <-
 
 ```
 
-```{r #figure_9}
+```{r #figure_8}
 
 # Creating the tmap and saving it as tmap object
 tmap_mode("view")
@@ -1073,9 +1092,9 @@ tm_basemap(leaflet::providers$Esri.WorldStreetMap, alpha = 0.5) +
 
 ```
 
-```{r display_figure_9, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Geospatial distribution of top 10 accidents location and stretches of roads for pedestrians and cyclists by LSOAs", out.width="60%"}
+```{r display_figure_8, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Geospatial distribution of top 10 accidents location and stretches of roads for pedestrians and cyclists by LSOAs", out.width="60%"}
 
-include_graphics("Figures/figure_9.png")
+include_graphics("Figures/figure_8.png")
 
 ```
 
@@ -1127,7 +1146,7 @@ top10_table
 ```
 
 
-Figure 9 shows that...
+Figure 8 shows that...
 
  But from a policy perspective, the raw data presented in Table 12.1 is of limited use: aside from the fact that it contains only a tiny portion of the 2,910 OD pairs, it tells us little about where policy measures are needed, or what proportion of trips are made by walking and cycling. 
  
@@ -1259,19 +1278,19 @@ df_master <-
     left_join(annual_income, by = c("msoa_code" = "MSOA.code")) %>% 
     select(-7) 
 
-write.csv(df_master, "Data/df_master.csv")
+#write.csv(df_master, "Data/df_master.csv")
 
 ```
 
-```{r read_df_master, eval=TRUE}
+```{r read_df_master}
 
 df_master = read.csv("Data/df_master.csv")
 
 ```
 
 
-```{r simple_model_ped, eval=TRUE}
-
+```{r simple_model_ped}
+#, eval=TRUE
 set.seed(1234)
 test_idx = sample(nrow(df_master), round(0.20*nrow(df_master)))
 test_data = df_master[test_idx,]
@@ -1289,8 +1308,8 @@ rmse_ped = rep(NA, 2)
 
 ```
 
-```{r simple_model_cyc, eval=TRUE}
-
+```{r simple_model_cyc}
+#, eval=TRUE
 set.seed(1234)
 test_idx = sample(nrow(df_master), round(0.20*nrow(df_master)))
 test_data = df_master[test_idx,]
@@ -1311,8 +1330,8 @@ rmse_cyc = rep(NA, 2)
 
 ```
 
-```{r df_simple_model_results, eval=TRUE, include=TRUE}
-
+```{r df_simple_model_results, include=TRUE}
+#, eval=TRUE
 data.frame(Model=c("Linear Regression", "Random Forest"), Pedestrian=rmse_ped, Cyclist=rmse_cyc) %>% 
   gt() %>% 
   tab_spanner(
@@ -1462,14 +1481,14 @@ include_graphics("Figures/Figure_10.png")
 
 
 
-```{r od_leeds_csv, eval=TRUE}
+```{r od_leeds_csv}
 
 od_leeds = read.csv("Data/od_leeds.csv")
 
 ```
 
 
-```{r df_ped_ac_msoa, eval=TRUE}
+```{r df_ped_ac_msoa}
 
 df_ped_ac_msoa = 
 df_total_ac_leeds_cleaned_msoa %>% 
@@ -1481,7 +1500,7 @@ df_total_ac_leeds_cleaned_msoa %>%
 
 ```
 
-```{r od_leeds_walk, eval=TRUE}
+```{r od_leeds_walk}
 
 od_leeds_walk = 
 od_leeds %>% 
@@ -1608,7 +1627,7 @@ sapply(df, class)
 
 A closer look at the proportion of serious and fatal accidents by casualty types, shown in Figure 4, reveals that there were consistently four main categories of casualties in such accidents, namely, car occupant, pedestrian, cyclist and motorcyclist and/or their pillion riders. Of these, the latter three are the most vulnerable; they were involved in at least x % of serious and fatal accidents. The propensity for these casualties to sustain serious or fatal injuries would reasonably be higher because they are unprotected and therefore more exposed to severe impacts in accidents. In the subsequent sections, we will focus on pedestrian and cyclists and further analyse accidents involving them.       
 
-```{r #figure_4}
+```{r #figure_44}
 
 # Reverse the levels of factor
 df_total_ac_leeds_cleaned$cas_type <- 
@@ -1632,7 +1651,7 @@ figure_4 + ggsave("Figures/Figure_4.png", width = 6, height = 4)
 
 ```
 
-```{r display_figure_4, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Proportion of Serious and Fatal Accidents in Leeds by Casualty Type, 2014-2018", out.width="60%"}
+```{r display_figure_44, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Proportion of Serious and Fatal Accidents in Leeds by Casualty Type, 2014-2018", out.width="60%"}
 
 include_graphics("Figures/Figure_4.png")
 
