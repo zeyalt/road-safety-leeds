@@ -189,9 +189,7 @@ concatenated the datasets for the individual years into a main dataframe using t
 Data cleaning is also an important part of data preparation. The raw datasets from the `stats19` package had
 been cleaned and formatted to a large extent. Notwithstanding, we found that a minority of the variables
 contained missing data. One of them was the variable `time`, which had five `NA` values. These missing values
-were imputed with the median^[Median was chosen over mean as it is typically less sensitive to outliers.] of the non-missing values1. The variable `lsoa_of_accident_location` was
-also found to have 58 `NA` values. Using `tmap` and the LSOA boundaries data, we manually inspected accident
-locations corresponding to each missing value and assigned the nearest LSOA to each missing value.
+were imputed with the median^[Median was chosen over mean as it is typically less sensitive to outliers.] of the non-missing values1. The variable `lsoa_of_accident_location` was also found to have 58 `NA` values. Using `tmap` and the LSOA boundaries data, we manually inspected accident locations corresponding to each missing value and assigned the nearest LSOA to each missing value.
 
 
 ```{r #df_total_ac_leeds}
@@ -235,7 +233,12 @@ df_total_ac_leeds = bind_rows(df_leeds_ac_2014,
 
 ```
 
-An important part of data preparation is data cleaning. In a scenario that the raw datasets needs to be cleaned, one useful method is to visualise possible outliers in data through boxplots. These outliers may bedue to human errors and therefore need to be removed. The raw datasets which we had obtained from the `stats19` package had been cleaned and formatted to a large extent.  Notwithstanding, we used the `plot_missing()` function from the `DataExplorer` package and found that a minority of the variables still contained missing data. One of them is the variable `time`, which contained a total of five `NA` values. There are several ways to deal with such missing data, including deletion, imputation or filling them with zeroes. In this instance, we imputed the missing values of the `time` variable with the median of the non-missing values and median was chosen over mean because it is less sensitive to outliers.     
+It was assessed that preserving the accident records of these missing values would ensure that the analyses
+were more thorough. In other instances, alternative methods of dealing with missing values include deletion,
+imputation with mean and replacement with zero values. Apart from checking for missing data, another key
+step is to check for possible outliers, which can be due to human errors in data recording and therefore need
+to be removed. One common method of identifying outliers is to visualise the data using boxplots.
+
 ```{r #pre_process_1}
 
 ### 1. LOCATE MISSING VALUES ###
@@ -346,7 +349,12 @@ write.csv(df_total_ac_leeds_cleaned, "Data/df_total_ac_leeds_cleaned.csv")
 
 ```
 
-Out of a total of 48 variables, we selected 28 (?) and removed the rest as they were not needed for our subsequent analyses. We also used functions in the `lubridate` package to extract the year, month and day from the `date` variable. As some variables were categorical in nature but of the `character` class, they had to be converted to the `factor` class accordingly. There were 21 different types of casualties in the dataset altogether, but since our analyses would not require such fine-grained distinctions, we recategorised them into six main groups. We also found that there were multiple records in the dataset which corresponded to a single accident event, possibly due to accidents with multiple casualties. Thus, we filtered out the duplicates to retain only distinct accident events in the dataset. We also removed rows for which the LSOA information was missing. 
+Out of 48 variables, 28 were selected for subsequent analyses. We used functions in the lubridate package
+to extract the year, month and day from the date variable. As some variables were categorical but of the
+character class, they were converted to the factor class. There were originally 21 unique types of casualties
+in the dataset, but since our analyses would not require such fine-grained details, they were recategorised
+into six main groups. There were also multiple records corresponding to a single accident event, possibly
+due to accidents with multiple casualties. These duplicates were filtered out.    
 
 ```{r load_df_total_ac_leeds_cleaned, eval=TRUE}
 
@@ -357,7 +365,12 @@ df_total_ac_leeds_cleaned <- read.csv("Data/df_total_ac_leeds_cleaned.csv")
 
 ## 3.3 Exploratory Data Analysis
 
-Part of the EDA is to extract summary statistics and general trends from the data. We used the `summary()` function to obtain a summary of numerical variables, such as `age_of_casualty` and `number_of_vehicles`. We plotted a time-series graph to understand the trend of monthly number of accidents in Leeds from 2014 to 2018 (see Figure 1). It appeared that there was, to some extent, a seasonal pattern to the occurence of accidents in Leeds over this five-year period. The number of accidents typically increased at the beginning of the year, fluctuated over the next few months, and decreased towards the end of the year.  
+A key part of the EDA is to extract summary statistics and general trends from the dataset. We used
+the summary() function to obtain a summary of numerical variables, such as age_of_casualty and
+number_of_vehicles. We plotted a time-series graph, shown in Figure 1, to understand the trend of
+monthly number of accidents in Leeds from 2014 to 2018. To some extent, there was a seasonal pattern to
+the occurrences of accidents in Leeds during this period. The number of accidents typically increased at the
+beginning of the year, fluctuated over the next few months, and decreased towards the end of the year. 
   
 ```{r #eda2}
 
@@ -439,7 +452,13 @@ include_graphics("Figures/Figure_2.png")
 
 ```
 
-Figure 2 shows the overall numbers of accidents and casualties from 2014 to 2018. Both sub-figures in Figure 2 follow similar trends since the number of casualties and number of accidents are closely associated. The casualties numbers would reasonably be higher than accident counts because some accidents would involve multiple casualties. From Figure 2, it appears that the roads in Leeds are becoming safer, with steady declines in the number of accidents and casualties since 2015. The accident count in 2018 was 25% lower than that in 2015. A breakdown of these numbers by severity reveals further insights (see Figure 3). The decline in overall accidents since 2015, as we saw in Figure 2, was mainly contributed by the decrease in slight accidents, and to a lesser extent, serious accidents. Fatal accidents, however, had been on an increasing trend since 2016. 
+Figure 2 shows the overall numbers of accidents and casualties from 2014 to 2018. Both sub-figures follow
+similar trends but the casualty numbers were higher than accident counts plausibly because of accidents
+with multiple casualties. From Figure 2, it appeared that the roads in Leeds are becoming safer, with steady
+declines in the numbers of accidents and casualties since 2015. 2018 saw 25% less accidents than 2015.
+A breakdown by severity of accidents reveals further insights, as shown in Figure 3. The decline in overall
+accident numnbers since 2015, as we saw in Figure 2, was mainly contributed by decreases in slight accidents,
+and to a lesser extent, serious accidents. Fatal accidents, however, had been increasing trend since 2016.
 
 ```{r #figure_3}
  
