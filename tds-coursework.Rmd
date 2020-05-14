@@ -1199,19 +1199,17 @@ include_graphics("Figures/figure_8.png")
 
 # 7. The 'How': Modelling Accident Rates
 
-In this section, we will model accident rates for pedestrians and cyclists in Leeds by Middle Layer Super Ouput Areas (MSOAs) using various input variables. The central aim is to gain an understanding on how accident rates in a specific region could be correlated with various social and demographic factors.
+In this section, we will model accident rates for pedestrians and cyclists in Leeds by Middle Layer Super Ouput Areas (MSOAs) using various predictor variables. The central aim is to gain an understanding on how accident rates in a specific region could be correlated with various socio-demographic factors. 
 
 ## 7.1 Methodology
 
-Using the origin-destination (OD) data from the 2011 Census available in the `pct` package, we ascertained the percentages of individuals who walk or cycle to work. These walking or cycling levels by MSOAs will be used as variables to predict pedestrian or cyclist accident rates. In this analysis, "accident rate" is defined as the number of accidents per 1,000 residents in a specified region. To compute accident rates, the total number of accidents recorded in each MSOA from 2014 to 2018 is divided by the population of the MSOA^[For instance, with a population size of 6,909 and a total pedestrian accident count of 16, the MSOA with the code "E02002331" has an accident rate of 2.32 per 1000 residents.]. The 2018 population numbers were used as proxies in estimating the population size of each MSOA. 
+The response variable in our modelling is the pedestrian and cyclist accident rates. Here, we define "accident rate" as the number of accidents per 1,000 residents in a specified MSOA. To compute accident rates, the total number of accidents recorded in each MSOA was divided by the population of the MSOA^[For instance, with a population size of 6,909 and a total pedestrian accident count of 16, the MSOA with the code "E02002331" has an accident rate of 2.32 per 1000 residents.]. The 2018 population numbers were used as proxies in estimating the population size of each MSOA. 
 
-We explored two models---linear regression and random forest---to predict accident rates for pedestrians and cyclists. We first divided the 107 observations into training and test datasets based on an 80:20 split. The models were trained using the training data, and predictions were generated with the fitted models using the test data. A metric known as the "root-mean-squared-error" (RMSE)^[RMSE is a measure of how close the predicted values are from the actual values.] was used to evaluate the predictions by comparing them against the actual accident rates in the test data.
+Three predictor variables were used to model and predict the response variable. The first variable was walking or cycling levels by MSOA, calculated using the origin-destination (OD) data from the 2011 Census available in the `pct` package. The other two predictor variables are population density and total annual income. We explored two statistical models---linear regression and random forest. With these two statistical models and seven possible combinations of the three predictor variables, there were 14 possible models each for predicting pedestrian and cyclist accident rates. These are illustrated by the table in Appendix B.
 
-Next, we added further complexities to the modelling by introducing two more predictor variables---population density and total annual income. With three predictor variables, there are seven possible combinations, as shown in Appendix B. We trained the models on these combinations. As predictions vary depending on the random splitting of the original dataset, we performed cross-validation to decide which model and combination of input variables best predict accident rates for both pedestrians and cyclists.
+The dataset with 107 records was first divided into training and test datasets based on an 80:20 split. The 14 models were trained using the training data, and predictions were generated with the fitted models given input values in the test data. A metric known as the "root-mean-squared-error" (RMSE)^[RMSE is a measure of how close the predicted values are from the actual values. The lower the RMSE, the closer the predictions are to the actual values.] was used to evaluate the predictions against the actual accident rates in the test data. We performed cross-validation with 500 iterations to improve predictive performance. For each iteration, the model with the lowest RMSE was chosen as the best model. After 500 iterations, the model that attained the lowest RMSE score most frequently was the overall best model.  
 
 ## 7.2 Results and Discussions
-
-
 
 ```{r lsoa_msoa_lookup, eval=TRUE}
 
@@ -1222,7 +1220,6 @@ lsoa_msoa_lookup <- read.csv("Data/leeds_lsoa_msoa_lookup.csv",
   distinct(LSOA11CD, .keep_all = TRUE)
 
 ```
-
 
 ```{r leeds_travel_data, eval=TRUE}
 
@@ -1266,14 +1263,12 @@ leeds_pct %>%
 
 ```
 
-
 ```{r}
 
 travel_by_origin %>% 
   dplyr::summarise(sum(all), sum(foot), sum(bicycle))
 
 ```
-
 
 ```{r popdense_by_msoa, eval=TRUE}
 
@@ -1298,7 +1293,6 @@ df_total_ac_leeds_cleaned %>%
   left_join(lsoa_msoa_lookup, by = c("lsoa_of_accident_location" = "LSOA11CD"))
 
 ```
-
 
 ```{r df_ped_rate, eval=TRUE}
 
@@ -1359,79 +1353,34 @@ df_master = read.csv("Data/df_master.csv")
 
 ```
 
+Figure 9 shows the results of the cross-validation. For both groups, Models 9 to 14, which are random forest models, did not produce any predictions with the lowest RMSE. This implies that multiple linear regression was the more superior statistical model. The best model for predicting pedestrian accident rates was Model 5. This model uses two predictor variables--walking levels and total annual income. On the other hand, Model 4 was the best model for predicting cyclist accident rates. This model uses cycling levels and population density as the predictor variables. 
 
-```{r simple_model_ped, eval=TRUE}
-
-set.seed(1234)
-test_idx = sample(nrow(df_master), round(0.20*nrow(df_master)))
-test_data = df_master[test_idx,]
-train_data = df_master[-test_idx,]
-
-model_glm = glm(ped_ac_per_1k_pop ~ perc_walk, data = train_data)
-model_rf = randomForest(ped_ac_per_1k_pop ~ perc_walk, data = train_data)
-
-prediction_glm = predict(model_glm, newdata = test_data)
-prediction_rf = predict(model_rf, newdata = test_data)
-
-rmse_ped = rep(NA, 2)
-(rmse_ped[1] = round(rmse(test_data$ped_ac_per_1k_pop, prediction_glm), 4))
-(rmse_ped[2] = round(rmse(test_data$ped_ac_per_1k_pop, prediction_rf), 4))
-
-```
-
-```{r simple_model_cyc, eval=TRUE}
-
-set.seed(1234)
-test_idx = sample(nrow(df_master), round(0.20*nrow(df_master)))
-test_data = df_master[test_idx,]
-train_data = df_master[-test_idx,]
-
-model_glm = glm(cyc_ac_per_1k_pop ~ perc_cyc, data = train_data)
-model_rf = randomForest(cyc_ac_per_1k_pop ~ perc_cyc, data = train_data)
-
-prediction_glm = predict(model_glm, newdata = test_data)
-prediction_rf = predict(model_rf, newdata = test_data)
-
-(rmse_glm = rmse(test_data$cyc_ac_per_1k_pop, prediction_glm))
-(rmse_rf = rmse(test_data$cyc_ac_per_1k_pop, prediction_rf))
-
-rmse_cyc = rep(NA, 2)
-(rmse_cyc[1] = round(rmse(test_data$cyc_ac_per_1k_pop, prediction_glm), 4))
-(rmse_cyc[2] = round(rmse(test_data$cyc_ac_per_1k_pop, prediction_rf), 4))
-
-```
-
-Table 2 summarises the results of the performance of the two models in predicting pedestrian and cyclist accident rates of the MSOAs in the test data using walking and cycling levels respectively. The lower the RMSE, the closer the predictions were to the actual accident rates. These results show that the random forest model performed better in predicting pedestrian accident rates, but worse in predicting cyclist accident rates. 
-
-```{r df_simple_model_results, include=TRUE, eval=TRUE}
-
-data.frame(Model=c("Linear Regression", "Random Forest"), Pedestrian=rmse_ped, Cyclist=rmse_cyc) %>% 
-  gt() %>% 
-  tab_spanner(
-    label = c("RMSE for Predicted Accident Rates"), 
-    columns = vars(`Pedestrian`, `Cyclist`)
-    ) %>% 
-  cols_align(align = c("center"), columns = TRUE) %>% 
-  tab_header(title = "", subtitle = "Table 2: Evaluation of predictions using walking or cycling levels as the predictor variable")
-
-```
-
-Next, we introduced two more variables -- population density and total annual income -- to understand if these variables contribute towards predicting accident rates. With these variables, there are seven possible combinations of models (see Table 3). We trained both linear regression and random forest models on all of these combinations of input variables and determined which model produces the lowest RMSE. We implemented cross-validation with 500 iterations, each with a different random split, and plotted histograms showing frequencies of attaining lowest RMSE score for each model. These are shown in Figure 10.
+Although the two best models provide insights into the correlations between the response and predictor variables, they do not imply casuality. Correlation represents
+the size and direction of relationships between variables, whereas causality implies
+some form of cause-and-effect relationships. Despite the difference, correlations provide useful information and can help guide further research into the causal analysis between variables. For instance, knowing that cycling levels and population density are good predictors of cycling accident rates, further analyses can be conducted to investigate how and why these factors influence cycling accident rates. 
 
 ```{r model_combi_table, eval=TRUE, include=TRUE}
 
+all_combs <- c("Accident Rate ~  Walking or Cycling Levels",
+               "Accident Rate ~  Population Density",
+               "Accident Rate ~  Total Annual Income", 
+               "Accident Rate ~  Walking or Cycling Levels + Population Density",
+               "Accident Rate ~  Walking or Cycling Levels + Total Annual Income",
+               "Accident Rate ~  Population Density + Total Annual Income",
+               "Accident Rate ~  Walking or Cycling Levels + Population Density + Total Annual Income")
+
+model_combi1 <- data.frame(Model=seq(1,7), Combinations=all_combs) %>% 
+  mutate(Combinations=as.character(Combinations)) 
+
+model_combi2 <- data.frame(Model=seq(8,14), Combinations=all_combs) %>% 
+  mutate(Combinations=as.character(Combinations))
+
+model_combi_table <- bind_rows(model_combi1, model_combi2)
+
 model_combi_table <-
-data.frame(Model=c("1", "2", "3", "4", "5", "6", "7"), 
-           Combinations=c("Accident Rate ~ Walking or Cycling Levels",
-                          "Accident Rate ~ Population Density",
-                          "Accident Rate ~ Total Annual Income", 
-                          "Accident Rate ~ Walking or Cycling Levels + Population Density",
-                          "Accident Rate ~ Walking or Cycling Levels + Total Annual Income",
-                          "Accident Rate ~ Population Density + Total Annual Income",
-                          "Accident Rate ~ Walking or Cycling Levels + Population Density + Total Annual Income")) %>% 
+model_combi_table %>%
   gt() %>% 
-  cols_align(align = c("left"), columns = TRUE) %>% 
-  tab_header(title = "", subtitle = "Table 3: Combinations of models with different input variables in predicting accident rates")
+  tab_source_note(source_note = "Models 1 to 7 are multiple linear regression models, whereas Models 8 to 14 are random forest models.")
 
 ```
 
@@ -1546,40 +1495,6 @@ ggsave("Figures/Figure_10.png",
 ```{r display_figure_10, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Cross-validation results for prediction of pedestrian (left) and cyclist accident rates (right)"}
 
 include_graphics("Figures/Figure_10.png")
-
-```
-
-
-
-
-```{r od_leeds_csv}
-
-od_leeds = read.csv("Data/od_leeds.csv")
-
-```
-
-
-```{r df_ped_ac_msoa}
-
-df_ped_ac_msoa = 
-df_total_ac_leeds_cleaned_msoa %>% 
-  filter(cas_type == "Pedestrian") %>% 
-  group_by(MSOA11CD) %>% 
-  dplyr::summarise(count = n()) %>% 
-  arrange(desc(count)) %>% 
-  mutate(`Percentage of Pedestrian Accidents` = count * 100 / sum(count))
-
-```
-
-```{r od_leeds_walk}
-
-od_leeds_walk = 
-od_leeds %>% 
-  group_by(geo_code1) %>% 
-  dplyr::summarise(all=sum(all), walk=sum(foot))%>% 
-  mutate(`Percentage of Walking` = walk * 100 / all) %>% 
-  arrange(desc(`Percentage of Walking`)) %>% 
-  mutate(geo_code1 = as.character(geo_code1))
 
 ```
 
@@ -1764,16 +1679,64 @@ model_combi_table
 ```
 
 
-### Recovered
-
-```{r}
+### JUNK
 
 
+```{r simple_model_ped, eval=TRUE}
+
+set.seed(1234)
+test_idx = sample(nrow(df_master), round(0.20*nrow(df_master)))
+test_data = df_master[test_idx,]
+train_data = df_master[-test_idx,]
+
+model_glm = glm(ped_ac_per_1k_pop ~ perc_walk, data = train_data)
+model_rf = randomForest(ped_ac_per_1k_pop ~ perc_walk, data = train_data)
+
+prediction_glm = predict(model_glm, newdata = test_data)
+prediction_rf = predict(model_rf, newdata = test_data)
+
+rmse_ped = rep(NA, 2)
+(rmse_ped[1] = round(rmse(test_data$ped_ac_per_1k_pop, prediction_glm), 4))
+(rmse_ped[2] = round(rmse(test_data$ped_ac_per_1k_pop, prediction_rf), 4))
 
 ```
 
-### JUNK
+```{r simple_model_cyc, eval=TRUE}
 
+set.seed(1234)
+test_idx = sample(nrow(df_master), round(0.20*nrow(df_master)))
+test_data = df_master[test_idx,]
+train_data = df_master[-test_idx,]
+
+model_glm = glm(cyc_ac_per_1k_pop ~ perc_cyc, data = train_data)
+model_rf = randomForest(cyc_ac_per_1k_pop ~ perc_cyc, data = train_data)
+
+prediction_glm = predict(model_glm, newdata = test_data)
+prediction_rf = predict(model_rf, newdata = test_data)
+
+(rmse_glm = rmse(test_data$cyc_ac_per_1k_pop, prediction_glm))
+(rmse_rf = rmse(test_data$cyc_ac_per_1k_pop, prediction_rf))
+
+rmse_cyc = rep(NA, 2)
+(rmse_cyc[1] = round(rmse(test_data$cyc_ac_per_1k_pop, prediction_glm), 4))
+(rmse_cyc[2] = round(rmse(test_data$cyc_ac_per_1k_pop, prediction_rf), 4))
+
+```
+
+
+
+```{r df_simple_model_results, include=TRUE, eval=TRUE}
+
+data.frame(Model=c("Linear Regression", "Random Forest"), Pedestrian=rmse_ped, Cyclist=rmse_cyc) %>% 
+  gt() %>% 
+  tab_spanner(
+    label = c("RMSE for Predicted Accident Rates"), 
+    columns = vars(`Pedestrian`, `Cyclist`)
+    ) %>% 
+  cols_align(align = c("center"), columns = TRUE) %>% 
+  tab_header(title = "", subtitle = "Table 2: Evaluation of predictions using walking or cycling levels as the predictor variable")
+
+```
 
 seemed to be dangerous months for cyclists. During these winter months, the weather is typically colder, and the roads wet and slippery. Cyclists are exposed to such harsh weather elements and these conditions make them more susceptible to accidents. On the other hand, the safest months for cyclist are April and August. 
 
