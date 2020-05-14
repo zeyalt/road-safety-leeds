@@ -867,9 +867,13 @@ df_total_ac_leeds_cleaned %>%
 
 ```
 
-A key difference in the spatial patterns of pedestrian and cyclist accidents is that the further an LSOA was from the city centre, the safer it was for pedestrians than for cyclists. For pedestrians, this could be due to a variety of factors such as lower walking levels and lesser vehicular traffic in the outskirts. On the other hand, a substantial number of LSOAs away from the city centre saw above-average accident rates for cyclists. Cyclists are more transient and cover longer distances than pedestrians. It is reasonable that cyclists would cross several LSOAs during their commutes. This means that they could get into accidents in LSOAs different from the LSOA where they live. Moreover, locations of cyclist accidents could be related to the availability of cycling infrastructure. 
+A key difference in the spatial patterns of pedestrian and cyclist accidents is that the further an LSOA was from the city centre, the safer it was for pedestrians than for cyclists. For pedestrians, this could be due to a variety of factors such as lower walking levels and lesser vehicular traffic in the outskirts. On the other hand, a substantial number of LSOAs away from the city centre saw above-average accident rates for cyclists. Cyclists are typically more transient and cover longer distances than pedestrians. It is reasonable that cyclists would cross several LSOAs during their commutes. This means that they could get into accidents in LSOAs different from the LSOA where they live. Moreover, locations of cyclist accidents could be related to the availability of cycling infrastructure. 
 
-Beyond an analysis by regions, an analysis by road networks could provide more insights on specific accident hot-spots. In this analysis, we focused on the top 10 most accident-prone roads in Leeds for pedestrians and cyclists, based on data from 2014 to 2018. This is shown in Figure 8. 
+Figure 8 shows the geospatial distribution of the top 5 roads in Leeds which recorded the most accidents for pedestrians and cyclists between 2014 and 2018. The names of these roads and the accident counts are summarised in the Appendix. Dewsbury Road (A653) and Otley Road (A660) both recorded high accident counts for pedestrians and cyclists and should therefore be of utmost concern for the local authorities. As Figure 8 shows, except for Harehills Lane, all roads were major arterial roads leading from different parts of Leeds towards the city centre. A plausible explanation is that these roads could be most frequently used by the walking and cycling population. 
+
+The fact that the roads highlighted in Figure 8 recorded the most pedestrian and cyclist accidents may not necessarily mean that they were of higher accident risks than others. It is possible that these roads recorded the highest accident counts because they were longer in length, such as Dewsbury Road, or more frequently used by people than other roads. An extension of this analysis could therefore be to investigate the accident susceptibility of a road, balanced against all factors that could influence its accident counts. 
+
+Our findings from this analysis can nevertheless influence policies to improve road safety. For instance, given that Harehills Lane was the only road in the top 5 lists that does not lead to the city centre but yet recorded high pedestrian accidents, local authorities can engage neighbouring residents on tips to enhance their safety as pedestrians. With at least five primary schools in the vicinity of Harehills Lane, it will also be useful to educate the children from these schools on road safety. For cyclists, local authorities can explore building cycling infrastructures such as dedicated cycling lanes along stretches with high propensity of cyclist accidents, such as Kirkstall Road and Headingley Lane. If cycling infrastructures already exist, local authorities can review them to improve the infrastructure. Given that pedestrians and cyclists are often victims in accidents with motor vehicles, more traffic enforcement can be conducted along these stretches to shape drivers' behaviours and deter egregious driving.
 
 ```{r #download_osm_as_sf}
 
@@ -1122,8 +1126,6 @@ r1 %>%
 
 ```
 
-
-
 ```{r #figure_8}
 
 # Creating the tmap and saving it as tmap object
@@ -1132,7 +1134,6 @@ tmap_mode("view")
 (figure_8 <-
     tm_basemap(leaflet::providers$Esri.WorldStreetMap, alpha = 0.5) +
     tm_shape(r2) +
-    #tm_shape(sf_top10_vru_lines) +
     tm_lines("cas_type", popup.vars = c("cas_type", "index"), 
              palette = "Set1", lwd = 2, title.col = c("Casualty Types")) +
     tm_shape(sf_top5_vru_points) +
@@ -1142,15 +1143,7 @@ tmap_mode("view")
 
 ```
 
-```{r display_figure_8, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Geospatial distribution of top 10 accidents location and stretches of roads for pedestrians and cyclists by LSOAs", out.width="60%"}
-
-include_graphics("Figures/figure_8.png")
-
-```
-
-# stopped here
-
-```{r gt_table, eval=TRUE, include=TRUE}
+```{r top5_table, eval=TRUE, include=TRUE}
 
 # Prepare data for table
 ped_table =
@@ -1176,46 +1169,45 @@ merge(data.frame(ped_table, row.names = NULL), data.frame(cyc_table, row.names =
   arrange(Row.names) %>% 
   select(-Row.names) %>% 
   gt() %>% 
-  tab_header(title = "", subtitle = "Table 1: Top 10 Accident Locations by Roads, 2014-2018") %>% 
+  tab_header(title = "", subtitle = "Table 1: Top 5 Accident Locations in Leeds by Roads, 2014-2018") %>% 
   tab_spanner(
      label = c("Pedestrians"), 
-     columns = vars(`name.x`, `count.x`)
+     columns = vars(`name.x`,  `ref.x`, `count.x`)
   ) %>% 
   tab_spanner(
      label = c("Cyclists"), 
-     columns = vars(`name.y`, `count.y`)
+     columns = vars(`name.y`, `ref.y`, `count.y`)
   ) %>% 
   cols_label(
     name.x = "Road Name",
     count.x = "Accident Count",
+    ref.x = "Reference",
     name.y = "Road Name",
-    count.y = "Accident Count"
+    count.y = "Accident Count",
+    ref.y = "Reference"
   )
 
-# Show table
-top5_table
-
-gtsave(top5_table, "Figures/test.png")
+# Table displayed as part of Appendix.
 
 ```
 
+```{r display_figure_8, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Top 5 roads with highest accident counts for pedestrians and cyclists", out.width="60%"}
 
-Figure 8 shows that...
+include_graphics("Figures/figure_8.png")
 
- But from a policy perspective, the raw data presented in Table 12.1 is of limited use: aside from the fact that it contains only a tiny portion of the 2,910 OD pairs, it tells us little about where policy measures are needed, or what proportion of trips are made by walking and cycling. 
- 
- 
+```
+
 # 7. The 'How': Modelling Accident Rates
 
-In this section, we will model accident rates for pedestrians and cyclists in Leeds by Middle Layer Super Ouput Areas (MSOAs) using various input variables. The central aim of this modelling is to gain an understanding on how accident rates in a specific region could be correlated with and possibly be predicted by various social and demographic factors.
+In this section, we will model accident rates for pedestrians and cyclists in Leeds by Middle Layer Super Ouput Areas (MSOAs) using various input variables. The central aim is to gain an understanding on how accident rates in a specific region could be correlated with various social and demographic factors.
 
 ## 7.1 Methodology
 
-Using the origin-destination (OD) data from the 2011 Census available in the `pct` package, we will ascertain the percentages of individuals who walk or cycle to work (?). These walking or cycling levels by MSOAs will be used as input variables to predict pedestrian or cyclist accident rates. In this analysis, accident rate is defined as the number of accidents per 1000 residents in a specified region. To compute accident rates, the total number of accidents recorded in each MSOA from 2014 to 2018 is divided by the population of the MSOA. The 2018 population numbers were used as proxies in estimating the population size of each MSOA. For instance, with a population size of 6,909 and a total pedestrian accident count of 16, the MSOA with the code "E02002331" has an accident rate of 2.32 per 1000 residents.
+Using the origin-destination (OD) data from the 2011 Census available in the `pct` package, we ascertained the percentages of individuals who walk or cycle to work. These walking or cycling levels by MSOAs will be used as variables to predict pedestrian or cyclist accident rates. In this analysis, "accident rate" is defined as the number of accidents per 1,000 residents in a specified region. To compute accident rates, the total number of accidents recorded in each MSOA from 2014 to 2018 is divided by the population of the MSOA^[For instance, with a population size of 6,909 and a total pedestrian accident count of 16, the MSOA with the code "E02002331" has an accident rate of 2.32 per 1000 residents.]. The 2018 population numbers were used as proxies in estimating the population size of each MSOA. 
 
-We will explore two models -- linear regression and random forest -- in predicting accident rates for pedestrians and cyclists. We first divide the 107 observations into training and test datasets based on an 80:20 split. The models will be trained using the training data, and predictions will be generated with the fitted models using the test data. We will use a metric known as the "root-mean-squared-error" (RMSE) to evaluate the predictions by comparing them against the actual accident rates in the test data, and decide which model is better.
+We explored two models---linear regression and random forest---to predict accident rates for pedestrians and cyclists. We first divided the 107 observations into training and test datasets based on an 80:20 split. The models were trained using the training data, and predictions were generated with the fitted models using the test data. A metric known as the "root-mean-squared-error" (RMSE)^[RMSE is a measure of how close the predicted values are from the actual values.] was used to evaluate the predictions by comparing them against the actual accident rates in the test data.
 
-Next, we will add further complexities to the modelling of accident rates by introducing two more variables -- population density and total annual income. We will train the models on different combinations of these input variables. As predictions generally vary depending on the random splitting of the original dataset, we will perform cross-validation to decide which model and combination of input variables best predict accident rates for both pedestrians and cyclists.
+Next, we added further complexities to the modelling by introducing two more predictor variables---population density and total annual income. With three predictor variables, there are seven possible combinations, as shown in Appendix B. We trained the models on these combinations. As predictions vary depending on the random splitting of the original dataset, we performed cross-validation to decide which model and combination of input variables best predict accident rates for both pedestrians and cyclists.
 
 ## 7.2 Results and Discussions
 
@@ -1232,7 +1224,7 @@ lsoa_msoa_lookup <- read.csv("Data/leeds_lsoa_msoa_lookup.csv",
 ```
 
 
-```{r leeds_travel_data}
+```{r leeds_travel_data, eval=TRUE}
 
 # Get origin-destination data for Leeds
 leeds_od = pct::get_od(region = "west-yorkshire") %>% 
@@ -1250,7 +1242,7 @@ travel_by_origin =
 
 ```
 
-```{r}
+```{r walking_and_cycling_levels}
 
 # What is the walking level in Leeds City Centre?
 
@@ -1260,6 +1252,7 @@ leeds_pct = read.csv("Data/commute-lsoa-west-yorkshire-z_attributes.csv")
 
 leeds_pct %>% 
   group_by(geo_code) %>% 
+  summarise_if(is.numeric, sum) %>%
   mutate(perc_walk = foot * 100/all) %>% 
   arrange(desc(perc_walk)) %>% 
   select(geo_code, perc_walk)
@@ -1270,18 +1263,6 @@ leeds_pct %>%
   mutate(perc_cyc = bicycle * 100/all) %>% 
   arrange(desc(perc_cyc)) %>% 
   select(geo_code, perc_cyc)
-
-sf_norm_cyc_by_lsoa %>% 
-  filter(`Accident Index` > 0.8) %>% 
-  select(code)
-
-leeds_od %>% 
-  group_by(geo_code2) %>% 
- 
-  mutate(perc_cyc = bicycle * 100/all) %>% 
-  select(geo_code2, perc_cyc) %>% 
-  arrange(desc(perc_cyc)) 
-  
 
 ```
 
@@ -1294,7 +1275,7 @@ travel_by_origin %>%
 ```
 
 
-```{r popdense_by_msoa}
+```{r popdense_by_msoa, eval=TRUE}
 
 # Load raw data
 popdense_by_lsoa <- read.csv("Data/leeds-population-density-by-lsoa.csv", stringsAsFactors = FALSE) %>% 
@@ -1319,7 +1300,7 @@ df_total_ac_leeds_cleaned %>%
 ```
 
 
-```{r df_ped_rate}
+```{r df_ped_rate, eval=TRUE}
 
 df_ped_rate <-
   df_total_ac_leeds_cleaned_msoa %>% 
@@ -1332,7 +1313,7 @@ df_ped_rate <-
 
 ```
 
-```{r df_cyc_rate}
+```{r df_cyc_rate, eval=TRUE}
 
 df_cyc_rate <-
   df_total_ac_leeds_cleaned_msoa %>% 
@@ -1345,7 +1326,7 @@ df_cyc_rate <-
 
 ```
 
-```{r annual_income}
+```{r annual_income, eval=TRUE}
 
 annual_income <- read.csv("Data/leeds-total-annual-income-2018.csv", 
                           stringsAsFactors = FALSE) %>% 
@@ -1353,7 +1334,7 @@ annual_income <- read.csv("Data/leeds-total-annual-income-2018.csv",
 
 ```
 
-```{r #df_master}
+```{r df_master, eval=TRUE}
 
 # With all data, create main dataframe for modelling
 df_master <-
@@ -1379,8 +1360,8 @@ df_master = read.csv("Data/df_master.csv")
 ```
 
 
-```{r simple_model_ped}
-#, eval=TRUE
+```{r simple_model_ped, eval=TRUE}
+
 set.seed(1234)
 test_idx = sample(nrow(df_master), round(0.20*nrow(df_master)))
 test_data = df_master[test_idx,]
@@ -1398,8 +1379,8 @@ rmse_ped = rep(NA, 2)
 
 ```
 
-```{r simple_model_cyc}
-#, eval=TRUE
+```{r simple_model_cyc, eval=TRUE}
+
 set.seed(1234)
 test_idx = sample(nrow(df_master), round(0.20*nrow(df_master)))
 test_data = df_master[test_idx,]
@@ -1420,8 +1401,10 @@ rmse_cyc = rep(NA, 2)
 
 ```
 
-```{r df_simple_model_results, include=TRUE}
-#, eval=TRUE
+Table 2 summarises the results of the performance of the two models in predicting pedestrian and cyclist accident rates of the MSOAs in the test data using walking and cycling levels respectively. The lower the RMSE, the closer the predictions were to the actual accident rates. These results show that the random forest model performed better in predicting pedestrian accident rates, but worse in predicting cyclist accident rates. 
+
+```{r df_simple_model_results, include=TRUE, eval=TRUE}
+
 data.frame(Model=c("Linear Regression", "Random Forest"), Pedestrian=rmse_ped, Cyclist=rmse_cyc) %>% 
   gt() %>% 
   tab_spanner(
@@ -1433,12 +1416,11 @@ data.frame(Model=c("Linear Regression", "Random Forest"), Pedestrian=rmse_ped, C
 
 ```
 
-Table 2 summarises the results of the performance of the two models in predicting pedestrian and cyclist accident rates of the MSOAs in the test data using walking and cycling levels respectively. The lower the RMSE, the closer the predictions are to the actual accident rates. These results show that the random forest model performed better in predicting pedestrian accident rates, but worse in predicting cyclist accident rates. 
-
 Next, we introduced two more variables -- population density and total annual income -- to understand if these variables contribute towards predicting accident rates. With these variables, there are seven possible combinations of models (see Table 3). We trained both linear regression and random forest models on all of these combinations of input variables and determined which model produces the lowest RMSE. We implemented cross-validation with 500 iterations, each with a different random split, and plotted histograms showing frequencies of attaining lowest RMSE score for each model. These are shown in Figure 10.
 
 ```{r model_combi_table, eval=TRUE, include=TRUE}
 
+model_combi_table <-
 data.frame(Model=c("1", "2", "3", "4", "5", "6", "7"), 
            Combinations=c("Accident Rate ~ Walking or Cycling Levels",
                           "Accident Rate ~ Population Density",
@@ -1452,7 +1434,6 @@ data.frame(Model=c("1", "2", "3", "4", "5", "6", "7"),
   tab_header(title = "", subtitle = "Table 3: Combinations of models with different input variables in predicting accident rates")
 
 ```
-
 
 ```{r #modelling_ped_ac}
 
@@ -1616,6 +1597,11 @@ Given the analyses and findings, I plan to propose some policy recommendations t
 
 # 9. Limitations of Analyses
 
+
+spatio-temporal
+
+
+
 In this section, I plan to state the limitations of this project and how my analyses can be improved/changed.
 
 The first OSM boundary returned by OSM may not be the official boundary used by local authorities
@@ -1658,7 +1644,7 @@ See Figure \@ref(fig:cars).
 
 ```
 
-
+\newpage
 # References
 
 (1 https://inrix.com/press-releases/scorecard-2018-uk/)
@@ -1759,6 +1745,25 @@ include_graphics("Figures/Figure_4.png")
 
 ```
 
+\newpage
+# Appendix
+```{r display_top5_table, eval=TRUE, include=TRUE}
+
+# Show table
+top5_table
+
+```
+
+\newpage
+# Appendix B
+```{r display_model_combi_table, eval=TRUE, include=TRUE}
+
+# Show table
+model_combi_table
+
+```
+
+
 ### Recovered
 
 ```{r}
@@ -1782,6 +1787,13 @@ Some inferences can be made from this observation regarding people's travel beha
 It can be inferred that people cycle for the specific purposes of commuting to work or school, which could explain why there were lesser accidents during work or school hours. On the contrary, there were more pedestrian casualties during work or school hours because 
 
 In addition, pedestrians seemed to be fairly accident-prone on weekends, particularly accident-prone on Saturdays between 4.00pm and 5.00pm.
+
+
+Figure 8 shows that...
+
+ But from a policy perspective, the raw data presented in Table 12.1 is of limited use: aside from the fact that it contains only a tiny portion of the 2,910 OD pairs, it tells us little about where policy measures are needed, or what proportion of trips are made by walking and cycling. 
+ 
+ 
 
 ### EXTRA
 
