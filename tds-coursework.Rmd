@@ -414,6 +414,7 @@ write.csv(df_total_ac_leeds_cleaned, "Data/df_total_ac_leeds_cleaned.csv")
 ```
 
 Out of 48 variables, 28 were selected for subsequent analyses. We used functions in the lubridate package to extract the year, month and day from the date variable. As some variables were categorical but of the character class, they were converted to the factor class. There were originally 21 unique types of casualties in the dataset, but since our analyses would not require such fine-grained details, they were recategorised into six main groups. There were also multiple records corresponding to a single accident event, possibly due to accidents with multiple casualties. These duplicates were filtered out.    
+
 ```{r load_df_total_ac_leeds_cleaned, eval=TRUE}
 
 df_total_ac_leeds <- 
@@ -748,18 +749,23 @@ Another difference between both groups was that the polarisation of the morning 
 
 # 6. The 'Where': Geospatial Distribution of Accidents 
 
-Having gained insights into the temporal distribution of pedestrian and cyclist casyalties, we will, in this section, analyse the data geospatially. The key question to be addressed is, "Where were the most accident-prone locations?" This section explores this question in two aspects---by LSOA regions and by road networks. Such analyses have significant real-world implications. For instance, they enable local authorities to better prioritise and allocate resources for road infrastructure improvement works.  
+Having gained insights into the temporal distributions of pedestrian and cyclist casyalties, we will, in this section, analyse the data geospatially. The key research question to be addressed is, "Where were the most accident-prone locations?" This section explores this question in two aspects---by LSOA regions and by road networks. Such analyses have significant real-world applications. For instance, they enable local authorities to better prioritise and allocate resources for road infrastructure improvement works.  
 
 ## 6.1 Methodology
 
-The first approach was to analyse the geospatial distribution of accidents by LSOA regions. The datasets from the `stats19` package contained the LSOA of accident locations, but not their boundaries. This data had to be obtained from the UK Data Service (cite) and subsequently joined with our working dataset of accidents in Leeds. Instead of using absolute accident counts for pedestrians and cyclists in mapping this geospatial distribution, it was assessed that normalising these absolute numbers against the average for each group would be more informative in identifying regions in both ends of the spectrum--the safest and the most worrying regions.
+The first approach was to analyse the geospatial distribution of accidents by LSOA regions. The datasets from the `stats19` package contained the LSOA of accident locations, but not their boundaries. The boundary data was obtained from the UK Data Service (cite) and subsequently joined with our working dataset of accidents in Leeds. Instead of using absolute accident counts for pedestrians and cyclists, it was assessed that normalising these absolute numbers against the average for each group would be more informative in mapping out and identifying regions in both ends of the spectrum--the safest and the most worrying regions.
 
-These normalised accident counts will be referred to as the "accident index". An accident index ranges between -1 and 1; a negative index indicates that a region has below-average accident count, that is, a safer-than-average accident rate, and a positive index means otherwise. An accident index of around zero suggests that the region is close to the overall average. Thematic maps were plotted with these accident indices for both groups. A divergent colour scale was used to communicate geospatial variations of accident rates in an effective way: blue representing below-average rates and red, above-average. Basemaps were also included to provide some geographical context. 
+These normalised accident counts will be referred to as "accident index". An accident index ranges between -1 and 1; a negative index indicates that a region has below-average accident count, that is, a safer-than-average accident rate, and a positive index means otherwise. An accident index of around zero suggests that the region is close to the overall average. Thematic maps were plotted with these accident indices, as shown in Figure 7. A divergent colour scale was used to communicate geospatial variations of accident rates in an effective way: blue representing below-average rates and red, above-average. Basemaps were also included to provide some geographical context. 
 
+While an analysis by LSOAs is useful in allowing local authorities to focus on more accident-prone regions, it gives limited information on stretches of roads where pedestrians and cyclists were most susceptible. The second approach was therefore to analyse the geospatial distribution of accidents by road networks. The key objective was to determine the top 10 roads in Leeds which recorded the most accidents for pedestrians and cyclists. The different categories of highways in Leeds were first downloaded from OpenStreetMap using the `osm` package and these individual datasets were then concatenated. The resulting dataset was an simple features (sf) object with linestrings representing stretches of roads. 
+
+Spatial joins were performed using the `st_is_within()` function to link accident point data to the nearest stretch of road within a distance of 5 metres. Names and references of roads from the OpenStreetMap data were essential in this part of the analysis to identify specific road stretches which were most accident-prone. Unfortunately, as the data from OpenStreetMap is crowd-sourced, missingness of data was significantly rampant. 15.8% of the 3,268 accident records for pedestrians and cyclists had to be filtered out due to missing road names. This was the main limitation in this analysis. 
 
 ## 6.2 Results and Discussions
 
+Figure 7 shows thematic maps depicting the geospatial distributions of accident rates for pedestrians (left) and cyclists (right) by LSOA regions in Leeds. The LSOA that recorded the highest accident rate for pedestrians was E01033010, as represented by the darkest shade of red on the left thematic map. This region corresponds to the Leeds city centre and recorded a total of 103 pedestrian accidents over the five-year period. Many neighbouring LSOAs also had above-average accident rates for pedestrians. 
 
+Since it is the city centre, the human pedestrian traffic at these regions would be higher than others. This hypothesis is substantiated by data from the 2011 census, which showed that this LSOA had the highest walking level (cite). Closer analysis reveals that none of the 103 pedestrian accidents resulted in fatalities. In fact, 75% of them were classified as "slight" accidents. Given that traffic congestion is not uncommon in the city centre (cite leeds urban congestion), the speed of traffic would be moderate to slow, which meant that serious pedestrian injuries were less likely. 
 
 ```{r #download_LSOA_boundaries}
 
@@ -849,13 +855,11 @@ include_graphics("Figures/figure_7b.png")
 
 ```
 
-Figure 7 shows thematic maps depicting the geospatial distribution of accident rates for pedestrians (left) and cyclists (right) by LSOA regions in Leeds. The LSOA that recorded the highest number of pedestrian accidents, and which has an accident index of 1, is E01033010. This region is shaded in the darkest shade of red in the left thematic map. This region corresponds to Leeds city centre and recorded a total of 103 pedestrian accidents over the five-year period. In fact, many other LSOAs in its immediate vicinity also had above-average accident indices. Since it is the city centre, the human pedestrian traffic at these regions would be higher than others. Closer analysis reveals that none of these 103 pedestrian accidents resulted in fatalities. In fact, 77 of them, or 75% were classified as "slight" accidents. Given that traffic congestion is not uncommon in the city centre, the speed of traffic would be moderate to slow, which means that it is less likely to cause serious injuries to pedestrians in accidents. 
+The map on the right in Figure 7 for cyclist accidents had more regions highlighted in dark red---there were four LSOAs with accident index greater than 0.80, one of them being E01033010 as well. These LSOAs are close to one another and cover stretches of main arterial roads, such as Headingley Lane, Woodhouse Lane and Kirkstall Road. It is plausible that these roads were frequently used by cyclists to travel either towards the University or the city centre. As with the case for pedestrian accidents, none of the 141 cyclist accidents in these regions were fatal and a vast majority resulted in slight injuries. 
 
-The map on the right for cyclist accidents has more regions highlighted in dark red than the map for pedestrian accidents. There are four LSOA with accident indices greater than 0.80; one of them being E01033010 as well. In fact, these regions are close to one other, and they cover stretches of main arterial roads, such as Headingley Lane, Woodhouse Lane and Kirkstall Road, which links towards either the University or the city centre. A total of 141 accidents were recorded in these four LSOAs between 2014 and 2018. As with pedestrian accidents, none of these accidents were fatal and a vast majority resulted in slight injuries.       
+A key difference in the spatial patterns of pedestrian and cyclist accidents is that the further an LSOA was from the city centre, the safer it was for pedestrians than for cyclists. For pedestrians, this could be due to a variety of factors such as lower walking levels and lesser vehicular traffic in the outskirts. On the other hand, a substantial number of LSOAs away from the city centre saw above-average accident rates for cyclists. Cyclists are more transient and cover longer distances than pedestrians. It is reasonable that cyclists would cross several LSOAs during their commutes. This means that they could get into accidents in LSOAs different from the LSOA where they live. Moreover, locations of cyclist accidents could be related to the availability of cycling infrastructure. 
 
-
-
-darker shades of red represent areas of concern.
+The top 10 most accident-prone stretches of roads in Leeds for each group are shown in Figure 8. 
 
 
 ```{r #accident_counts}
@@ -868,11 +872,7 @@ df_total_ac_leeds_cleaned %>%
 
 ```
 
-Reconsider: Another spatial pattern from the left thematic map in Figure 8 is that the regions further away from Leeds city centre tend to be shaded in blue, which means that they are safer in terms of number of pedestrian accidents in that five-year period. (explain?)
 
-While an analysis by LSOAs is useful in allowing policy-makers to focus on more accident-prone regions, it does not provide insights into which stretches of roads within those "problematic" regions are of greatest concerns in terms of accident susceptibility. An analysis by roads, as shown in Figure 9, mitigates this limitation.  
-
-==
 
 ```{r}
 
@@ -884,8 +884,6 @@ unique(df_total_ac_leeds$light_conditions)
 
 
 ==
-
-The second approach was to analyse the geospatial distribution of accidents by road networks. The different categories of highways in Leeds were first downloaded using the `osm` package and these individual datasets were then concatenated. The resulting dataset was an simple features (sf) object with linestrings representing stretches of roads. Spatial joins were performed using the `st_is_within()` function to link accident point data to the nearest stretch of road within a distance of 5 metres. 
 
 
 
@@ -1097,7 +1095,7 @@ sf_top10_vru_points <-
 # Creating the tmap and saving it as tmap object
 tmap_mode("view")
 
-(figure_9 <-
+(figure_8 <-
 tm_basemap(leaflet::providers$Esri.WorldStreetMap, alpha = 0.5) +
   tm_shape(sf_top10_vru_lines) +
   tm_lines("cas_type", palette = "Set1", lwd = 2, title.col = c("Casualty Types")) + 
@@ -1209,6 +1207,42 @@ travel_by_origin =
   select(1, 2, 11, 12, 14, 15) # Select only the required columns
 
 ```
+
+```{r}
+
+# What is the walking level in Leeds City Centre?
+
+# leeds_pct = get_pct(region = "west-yorkshire", geography = "LSOA", layer = "l")
+# https://www.pct.bike/m/?r=west-yorkshire
+leeds_pct = read.csv("Data/commute-lsoa-west-yorkshire-z_attributes.csv")
+
+leeds_pct %>% 
+  group_by(geo_code) %>% 
+  mutate(perc_walk = foot * 100/all) %>% 
+  arrange(desc(perc_walk)) %>% 
+  select(geo_code, perc_walk)
+
+leeds_pct %>% 
+  group_by(geo_code) %>% 
+  summarise_if(is.numeric, sum) %>%
+  mutate(perc_cyc = bicycle * 100/all) %>% 
+  arrange(desc(perc_cyc)) %>% 
+  select(geo_code, perc_cyc)
+
+sf_norm_cyc_by_lsoa %>% 
+  filter(`Accident Index` > 0.8) %>% 
+  select(code)
+
+leeds_od %>% 
+  group_by(geo_code2) %>% 
+ 
+  mutate(perc_cyc = bicycle * 100/all) %>% 
+  select(geo_code2, perc_cyc) %>% 
+  arrange(desc(perc_cyc)) 
+  
+
+```
+
 
 ```{r}
 
@@ -1546,8 +1580,11 @@ The first OSM boundary returned by OSM may not be the official boundary used by 
 
 Section 4: limited demographic information about accident victims. 
 
+different roads with same name.
 
 A potential extension of this analysis is to break down these temporal patterns by regions or roads. This could potentially provide further insights on the spatio-temporal distribution of accidents. For instance, a particular stretch of road could have been more accident-prone for either pedestrians or cyclists during a specific time of the day or day of the week. Such information is useful for local authorities to not only implement targeted road safety education but also perform traffic enforcement duties to improve the overall safety.
+
+roads recorded high accidents not because it is unsafe but because they have higher usage. normalised against flow/network data?
 
 # 10. Conclusions
 
