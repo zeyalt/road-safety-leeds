@@ -610,7 +610,7 @@ include_graphics("Figures/Figure_4.png")
 
 Several useful insights can be extracted from Figure 4. For cyclists, there were significantly more male casualties than female. The distribution of male cyclist casualties appeared to be bimodal, that is, having two peaks---one at around 24 years old and another at around 40. The former could be attributed to male student population at the universities who cycle to school, whereas the latter could be more mature male adults who cycle to work, or cycle for competitive or recreational purposes. The peak age for female cyclist casualties was less apparent, although it seemed to be around mid-20s. One similarity between male and female cyclist casualties was that their age distributions tapered off at 75. 
 
-Unlike cyclist casualties, pedestrian casualties had more equal distribution between the genders. The age distributions for male and female pedestrian casualties were both positively skewed, with peaks at 12 and 14 years old respectively. These could be mainly high school students who get into accidents during their journeys either to or from schools. The histogram for pedestrians shows that the age distribution only tapered off in the late-80s or 90s, implying that many elderly were susceptible to accidents as pedestrians. 
+Unlike cyclist casualties, pedestrian casualties had more equal distribution between the genders. The age distributions for male and female pedestrian casualties were both positively skewed, with peaks at 12 and 14 years old respectively. These could be mainly high school students who get into accidents during their journeys either to or from schools, presumably due to negligence or carelessness. The histogram for pedestrians shows that the age distribution only tapered off in the late-80s or 90s, implying that many elderly were susceptible to accidents as pedestrians. 
 
 The boxplots show that pedestrian casualties were of lower median ages than cyclist casualties but they had higher IQR, meaning that the range of age of casualties was wider. This could also be observed from the histograms. For cyclist casualties, the median age of male casualties, shown by the middle black line of the box, was slightly higher than that of female casualties, although the spread of age measured by the inter-quartile range (IQR)^[The IQR is the difference between the upper quartile and lower quartile and represents the middle 50% of data. In boxplots, it is indicated by the height of the box.] were roughly similar. The converse is true for pedestrian casualties---female casualties were of a slightly higher median age than male. 
 
@@ -873,8 +873,7 @@ Figure 8 shows the geospatial distribution of the top 5 roads in Leeds which rec
 
 The fact that the roads highlighted in Figure 8 recorded the most pedestrian and cyclist accidents may not necessarily mean that they were of higher accident risks than others. It is possible that these roads recorded the highest accident counts because they were longer in length, such as Dewsbury Road, or more frequently used by people than other roads. An extension of this analysis could therefore be to investigate the accident susceptibility of a road, balanced against all factors that could influence its accident counts. 
 
-Our findings from this analysis can nevertheless influence policies to improve road safety. For instance, given that Harehills Lane was the only road in the top 5 lists that does not lead to the city centre but yet recorded high pedestrian accidents, local authorities can engage neighbouring residents on tips to enhance their safety as pedestrians. With at least five primary schools in the vicinity of Harehills Lane, it will also be useful to educate the children from these schools on road safety. For cyclists, local authorities can explore building cycling infrastructures such as dedicated cycling lanes along stretches with high propensity of cyclist accidents, such as Kirkstall Road and Headingley Lane. If cycling infrastructures already exist, local authorities can review them to improve the infrastructure. Given that pedestrians and cyclists are often victims in accidents with motor vehicles, more traffic enforcement can be conducted along these stretches to shape drivers' behaviours and deter egregious driving.
-
+Our findings from this analysis can nevertheless influence policies to improve road safety. 
 ```{r #download_osm_as_sf}
 
 # Create an sf object for motorway in Leeds
@@ -1500,21 +1499,33 @@ include_graphics("Figures/Figure_10.png")
 
 # 8. Policy Recommendations
 
-, suggesting that more can be done by parents and schools to educate young children on road safety. 
+Given the analyses and findings in this report, we propose a three-pronged strategy in enhancing road safety for pedestrians and cyclists---engineering, engagement and enforcement. This section outlines the key policy recommendations under each category.
 
-elderly.
-male student. male mature adults. female 20s. 
-Given the analyses and findings, I plan to propose some policy recommendations to enhance road safety for these VRUs. These recommendations can be broadly classified into the following main categories:
+## 8.1 Engineering the Roads for Better Safety
 
-- Road infrastructure and engineering
-- Targeted road safety education
-- Enforcement through technology
+Road engineering is one key element of road safety. We saw from our analyses in Section 6 that Leeds city centre had high numbers of pedestrian and cyclist accidents, but a majority of them had slight injuries. To reduce such accidents, the local authorities can consider introducing more non-signalised crossings such as zebra crossings. They provide more options for the crossing of roads so that pedestrians do not have to jay-walk. Barriers can be errected between pavements and roads to deter jay-walking and nudge people to use legitimate crossings. 
+
+For cyclists, more of the existing cycling lanes in the city centre can be segregated from vehicular lanes with kerbs, similar to the 2.5 mile-long stretch of cycling lane in the city centre that was opened in July 2019 as part of the Bradford-Leeds Cycle Superhighway (cite1). In addition, along stretches with high propensity of cyclist accidents as we saw in Section 6, the existing cycling infrastructures can be further improved. Possible areas of improvement include repainting faded lanes, lane-widening and installing kerb to segregate them from the main traffic.  
+
+## 8.2 Engagement for Better Road Safety Awareness
+
+Road safety engagement is another key pillar in improving safety of pedestrians and cyclists. Such engagement should be targeted to address the safety of specific groups. For instance, in Section 6, we saw that Harehills Lane was the only road in the top 5 lists that does not lead to the city centre but yet recorded high pedestrian accidents. Local authorities can engage residents living in its vicinity on ways to improve their safety on the roads. Given that there are also at least five primary schools near Harehills Lane, it will also be useful to give road safety talks to children of these schools. This is especially important because, as we saw in Section 4, children between 12 to 14 years old were particularly prone to accidents. Other possible target groups for road safety engagement include the sports cycling community, cycling groups at tertiary institutions as well as the senior citizen population.  
+
+## 8.3 Enforcement to Shape Road Users' Behaviours
+
+Given that pedestrians and cyclists are often victims in accidents with motor vehicles, effective traffic enforcement would be helpful in shaping drivers' behaviours and deter egregious driving. 
+
+# stopped here
+
+can be conducted along these stretches to shape drivers' behaviours and deter egregious driving.
+
+
+
 
 # 9. Limitations of Analyses
 
 
 spatio-temporal
-
 
 
 In this section, I plan to state the limitations of this project and how my analyses can be improved/changed.
@@ -1561,7 +1572,7 @@ See Figure \@ref(fig:cars).
 
 \newpage
 # References
-
+1 - https://www.bbc.com/news/uk-england-leeds-49044814
 (1 https://inrix.com/press-releases/scorecard-2018-uk/)
 I will include references here.
 
