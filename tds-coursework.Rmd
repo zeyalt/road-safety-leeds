@@ -126,11 +126,11 @@ for (i in 1:length(years)){
 
 ```
 
-# 3. Data Understanding and Pre-Processing
+# 2. Data Understanding and Pre-Processing
 
 Before analysing the data, it was important to first understand the raw datasets and pre-process them into forms suitable for subsequent analyses. This section will explain these stages in the context of the raw accident and casualties data from the `stats19` package.
 
-## 3.1 Understanding the Datasets
+## 2.1 Understanding the Datasets
 
 A useful way to understand the raw datasets was to first look at their column headings. The `stats19_variables` function was used to obtain brief descriptions of the columns. As these raw datasets would be concatenated, their column names had to match. It was found that the names of all of the 33 columns for the raw accidents datasets matched. However, for the raw casualties datasets, the 2014 dataset contained 15 columns, but the rest contained 16. The missing variable was `casualty_imd_decile`, which could have been recorded from 2015 onwards only. In addition, `str()` function was used to determine the classes of each variable. This enabled us to identify variables whose classes needed to be converted. For example, the variable `accident_severity` was of `character` class, but given that it was a catagorical variable, it had to be converted to the `factor` class.
 
@@ -148,14 +148,11 @@ str(raw_ac_2014)
 
 ```
 
-## 3.2 Data Preparation 
+## 2.2 Data Preparation 
 
 Having gained an understanding of the datasets, the next step was to prepare them for our analyses. The records for Leeds were filtered using the `filter()` function. For each year, the raw accident data was joined to the raw casualties data using the `left_join()` function, with  accident index as the joining key. The individual datasets were then concatenated using the `bind_rows()` function.
 
-### stopped here
-
-Data cleaning is also an important part of data preparation. The raw datasets from the `stats19` package had been cleaned and formatted to a large extent. Notwithstanding, we found that a minority of the variables contained missing data. One of them was the variable `time`, which had five `NA` values. These missing values were imputed with the median^[Median was chosen over mean as it is typically less sensitive to outliers.] of the non-missing values1. The variable `lsoa_of_accident_location` was also found to have 58 `NA` values. Using `tmap` and the LSOA boundaries data, we manually inspected accident locations corresponding to each missing value and assigned the nearest LSOA to each missing value. [How did this add value?]
-
+Data cleaning was also an important part of data preparation. Although the raw datasets from the `stats19` package had been cleaned to a large extent, a minority of the columns still contained missing data. An example was the variable `time`, which had five missing values. These missing values were imputed with the median^[Median was chosen over mean as it is typically less sensitive to outliers.] of the non-missing values. Another example was `lsoa_of_accident_location`, which contained 58 missing values. Using the `tmap` package, we mapped these 58 accident locations on a polygon layer representing LSOA boundaries, and manually assigned each to the nearest LSOA. 
 
 ```{r #df_total_ac_leeds}
 
@@ -198,7 +195,7 @@ df_total_ac_leeds = bind_rows(df_leeds_ac_2014,
 
 ```
 
-It was assessed that preserving the accident records of these missing values would ensure that the analyses were more thorough. In other instances, alternative methods of dealing with missing values include deletion, imputation with mean and replacement with zero values. Apart from checking for missing data, another key step is to check for possible outliers, which can be due to human errors in data recording and therefore need to be removed. One common method of identifying outliers is to visualise the data using boxplots.
+These two methods of data cleaning helped to preserve the records, thereby ensuring that the subsequent analyses were not affected by missing data. In other instances, alternative methods of dealing with missing values include deletion, imputation with mean and replacement with zero values. Apart from checking for missing data, it is also important to check for possible outliers, which can be due to human errors in data recording and need to be removed. One common method to identify outliers is to visualise the data using boxplots.
 
 ```{r #pre_process_1}
 
@@ -414,7 +411,7 @@ write.csv(df_total_ac_leeds_cleaned, "Data/df_total_ac_leeds_cleaned.csv")
 
 ```
 
-Out of 48 variables, 28 were selected for subsequent analyses. We used functions in the lubridate package to extract the year, month and day from the date variable. As some variables were categorical but of the character class, they were converted to the factor class. There were originally 21 unique types of casualties in the dataset, but since our analyses would not require such fine-grained details, they were recategorised into six main groups. There were also multiple records corresponding to a single accident event, possibly due to accidents with multiple casualties. These duplicates were filtered out.    
+Out of 48 variables altogether, 30 were selected for subsequent analyses. We used functions in the `lubridate` package to extract the year, month and day from the date variable. There were originally 21 unique types of casualties in the dataset, but since our analyses would not require such fine-grained details, they were recategorised into six main groups. There were also multiple records corresponding to a single accident event, possibly due to accidents with multiple casualties. These duplicates were filtered out.    
 
 ```{r load_df_total_ac_leeds_cleaned, eval=TRUE}
 
@@ -428,7 +425,7 @@ df_total_ac_leeds_cleaned <-
 
 ```
 
-## 3.3 Exploratory Data Analysis
+## 2.3 Exploratory Data Analysis
 
 A key part of the EDA is to extract summary statistics and general trends from the dataset. We used the `summary()` function to obtain a summary of numerical variables, such as `age_of_casualty` and `number_of_vehicles`. We plotted a time-series graph, shown in Figure 1, to understand the trend of monthly number of accidents in Leeds from 2014 to 2018. To some extent, there was a seasonal pattern to the occurrences of accidents in Leeds during this period. The number of accidents typically increased at the beginning of the year, fluctuated over the next few months, and decreased towards the end of the year. 
   
@@ -479,46 +476,11 @@ figure_2a + ggsave("Figures/Figure_2a.png", width = 6, height = 4)
 
 ```
 
+
 ```{r #figure_2b}
-
-# Bar chart showing total number of casualties in Leeds between 2014 and 2018
-(figure_2b <- 
-df_total_ac_leeds %>% 
-  group_by(year) %>% 
-  dplyr::summarise(count = n()) %>% 
-  ggplot(aes(x = year, y = count, fill = year)) +
-  geom_col(show.legend = FALSE, width = 0.6) +
-  scale_color_discrete(palette = "Paired") +
-  labs(x = "Year", y = "Number of Casualties") + 
-  geom_text(aes(label = count), vjust=-0.30, size=3))
-
-figure_2b + ggsave("Figures/Figure_2b.png", width = 6, height = 4)
-
-```
-
-```{r #save_figure_2a_and_2b}
-
-grid.arrange(figure_2a, figure_2b, nrow = 1, ncol = 2)
-
-ggsave("Figures/Figure_2.png", 
-       arrangeGrob(figure_2a, figure_2b, nrow = 1, ncol = 2),
-       width = 12, height = 4)
-
-```
-
-```{r display_figure_2, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Number of accidents (left) and casualties (right) in Leeds, 2014-2018"}
-
-include_graphics("Figures/Figure_2.png")
-
-```
-
-Figure 2 shows the overall numbers of accidents and casualties from 2014 to 2018. Both sub-figures follow similar trends but the casualty numbers were higher than accident counts plausibly because of accidents with multiple casualties. From Figure 2, it appeared that the roads in Leeds are becoming safer, with steady
-declines in the numbers of accidents and casualties since 2015. 2018 saw 25% less accidents than 2015. A breakdown by severity of accidents reveals further insights, as shown in Figure 3. The decline in overall accident numnbers since 2015, as we saw in Figure 2, was mainly contributed by decreases in slight accidents, and to a lesser extent, serious accidents. Fatal accidents, however, had been increasing since 2016.
-
-```{r #figure_3}
  
 # Breakdown of each year by accident severity
-(figure_3 <-
+(figure_2b <-
   df_total_ac_leeds_cleaned %>% 
   mutate(accident_severity = factor(accident_severity, 
                                     levels = c("Slight", "Serious", "Fatal"))) %>% 
@@ -537,25 +499,38 @@ declines in the numbers of accidents and casualties since 2015. 2018 saw 25% les
        y = "Number of Accidents") +
   geom_text(aes(label = count), vjust=-0.35, size=3))
 
-figure_3 + ggsave("Figures/Figure_3.png", width = 6, height = 4)
+figure_2b + ggsave("Figures/Figure_2b.png", width = 6, height = 4)
 
 ```
 
-```{r display_figure_3, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Number of accidents in Leeds by severity, 2014-2018", out.width="50%"}
 
-include_graphics("Figures/Figure_3.png")
+```{r #save_figure_2a_and_2b}
+
+grid.arrange(figure_2a, figure_2b, nrow = 1, ncol = 2)
+
+ggsave("Figures/Figure_2.png", 
+       arrangeGrob(figure_2a, figure_2b, nrow = 1, ncol = 2),
+       width = 12, height = 4)
 
 ```
 
-# 4. The 'Who': Profile of Accident Casualties
+```{r display_figure_2, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Number of accidents (left) and casualties (right) in Leeds, 2014-2018"}
 
-Having pre-processed the data and performed EDA, we will analyse it to gain insights on accidents involving pedestrians and cyclists. The focus of this section is answering the question, "Who were at risk of accidents?" by understanding the profiles of accident casualties based on past data. 
+include_graphics("Figures/Figure_2.png")
 
-## 4.1 Methodology
+```
 
-Limited demographic information about accident victims was available in the dataset, presumably due to the need to protect their privacy. The only demographic information available were age and gender, with which we plotted histograms and boxplots. Histograms provide useful insights into the distributions of casualties by age and gender, whereas boxplots allow us to graphically visualise the median and spread of the data. These plots are shown in Figure 4.
+Figure 2 shows the overall numbers of accidents from 2014 to 2018. It appeared that the roads in Leeds had been becoming safer, with steady declines in the numbers of accidents since 2015. 2018 saw 25% less accidents than 2015. A breakdown by severity of accidents, shown in Figure 3, revealed further insights. The decline in overall accident numbers since 2015 was largely contributed by decreases in slight and serious accidents. Fatal accidents, however, had been on a rise since 2016.
 
-## 4.2 Results and Discussions
+# 3. The 'Who': Profile of Accident Casualties
+
+Having pre-processed the data and performed EDA, we will begin our analysis to obtain insights on accidents involving pedestrians and cyclists. The first aspect of the analysis is to answer the question, "Who were most at risk of accidents?". This will be done by understanding the profiles of pedestrian and cyclist casualties based on past data. 
+
+## 3.1 Methodology
+
+Limited demographic information about accident victims were available in the dataset, presumably due to privacy reasons. In this section, histograms and boxplots were used to visualise the number of casualties by age and gender, which were the only demographic information available in the dataset. Histograms provide useful insights into the distributions of casualties by age and gender, whereas boxplots allow us to graphically visualise the median and spread of the age of casualties. 
+
+## 3.2 Results and Discussions
 
 ```{r #figure_4a}
 
@@ -609,7 +584,9 @@ include_graphics("Figures/Figure_4.png")
 
 ```
 
-Several useful insights can be extracted from Figure 4. For cyclists, there were significantly more male casualties than female. The distribution of male cyclist casualties appeared to be bimodal, that is, having two peaks---one at around 24 years old and another at around 40. The former could be attributed to male student population at the universities who cycle to school, whereas the latter could be more mature male adults who cycle to work, or cycle for competitive or recreational purposes. The peak age for female cyclist casualties was less apparent, although it seemed to be around mid-20s. One similarity between male and female cyclist casualties was that their age distributions tapered off at 75. 
+# stopped here
+
+The resulting plots are shown in Figure 4. For cyclists, there were significantly more male casualties than female. The distribution of male cyclist casualties appeared to be bimodal, that is, having two peaks---one at around 24 years old and another at around 40. The former could be attributed to male student population at the universities who cycle to school, whereas the latter could be more mature male adults who cycle to work, or cycle for competitive or recreational purposes. The peak age for female cyclist casualties was less apparent, although it seemed to be around mid-20s. One similarity between male and female cyclist casualties was that their age distributions tapered off at 75. 
 
 Unlike cyclist casualties, pedestrian casualties had more equal distribution between the genders. The age distributions for male and female pedestrian casualties were both positively skewed, with peaks at 12 and 14 years old respectively. These could be mainly high school students who get into accidents during their journeys either to or from schools, presumably due to negligence or carelessness. The histogram for pedestrians shows that the age distribution only tapered off in the late-80s or 90s, implying that many elderly were susceptible to accidents as pedestrians. 
 
@@ -1695,6 +1672,23 @@ model_combi_table
 
 ### JUNK
 
+
+```{r #figure_2bxx}
+
+# Bar chart showing total number of casualties in Leeds between 2014 and 2018
+(figure_2b <- 
+df_total_ac_leeds %>% 
+  group_by(year) %>% 
+  dplyr::summarise(count = n()) %>% 
+  ggplot(aes(x = year, y = count, fill = year)) +
+  geom_col(show.legend = FALSE, width = 0.6) +
+  scale_color_discrete(palette = "Paired") +
+  labs(x = "Year", y = "Number of Casualties") + 
+  geom_text(aes(label = count), vjust=-0.30, size=3))
+
+figure_2b + ggsave("Figures/Figure_2b.png", width = 6, height = 4)
+
+```
 
 spatio-temporal
 
