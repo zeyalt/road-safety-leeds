@@ -1,6 +1,6 @@
 ---
-title: "Transport Data Science (TRAN5340M)"
-subtitle: "Enhancing Road Safety of Pedestrians and Cyclists in Leeds"
+title: "Enhancing Road Safety of Pedestrians and Cyclists in Leeds"
+#subtitle: "Transport Data Science (TRAN5340M)"
 output: pdf_document
 # output:
 #   bookdown::pdf_document2: default
@@ -9,7 +9,13 @@ always_allow_html: true
 header-includes: 
 - \usepackage{graphicx}
 - \usepackage{float}
-#bibliography: references.bib
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \lhead{Zeya Lwin Tun, 201378539}
+- \chead{}
+- \rhead{TRAN5340M Transport Data Science}
+- \fancypagestyle{plain}{\pagestyle{fancy}}
+bibliography: references.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -24,21 +30,21 @@ knitr::opts_chunk$set(include = FALSE,
 
 # 1. Introduction
 
-Over the last decade, significant investments have been made by the United Kingdom (UK) Government to increase cycling and walking rates and improve road infrastructures for safety across the UK (cite). In 2017, the UK Government committed to make cycling and walking people's "natural choices for shorter journeys or parts of a longer journey" (cite). As the Government works towards realising this aim and more people take up walking or cycling as their primary modes of travel, it is imperative to concurrently address the issue of road safety, which is the central theme of this project. 
+Road safety of pedestrians and cyclists has been a subject of increasing interest for transport researchers and policy-makers worldwide. In the United Kingdom (UK), the Government made a commitment in 2017 to make cycling and walking people's "natural choices for shorter journeys or as a part of a longer journey" [@ukdepartmentfortransportCyclingWalkingInvestment]. To encourage more people to adopt such active modes of travel, the UK Government has been making significant investments over the last decade. Examples include dedicated walking and cycling programmes, cycling proficiency training for children as well as schemes such as the Bikeability and Cycle City Ambition schemes [@ukdepartmentfortransportCyclingWalkingInvestment]. To encourage an uptake of walking and cycling, it is also imperative to improve road safety for pedestrians and cyclists. The investment of £85 million to improve road infrastructures across the UK for pedestrian and cyclist safety is an example of a positive move by the UK Governement [@ukdepartmentfortransportCyclingWalkingInvestment]. 
 
-Addressing such transport problems using data science have been made possible with the increasing availability and accessibility of data in the transport industry and increasingly sophisticated analytical and modelling techniques. Its core advantage over traditional methods of solving transport problems is that the research methodologies and findings are more easily reproducible, and this strengthens the credibility and legitimacy of the research. 
-
-In this project, we will be applying transport data science techniques to analyse road safety data for Leeds, United Kingdom (UK). The focus will be on pedestrian and cyclists, two of the road user group which are most susceptible to sustaining serious or even fatal injuries in accidents. Any efforts to address their safety on the roads will thus help save lives. In addition, such efforts will also help create a safer environment and alleviate fears of being victims to road accidents, which may otherwise be a barrier to adopting active modes of travel. Ultimately, it is hoped that the findings from this project can support the UK Government's ambitions in promoting active travel, with safety as the top priority. The analysis underlying this research is reproducible, based on code stored at...
-
-## 1.1 Area of Study
-
-Leeds is situated in the West Yorkshire county of England, occupying 551.7 square kilometres of land area. It has a population size of close to 800,000 (cite ONS) and a population density of about 1,450 residents per square kilometres. Leeds is divided into 107 Middle Layer Super Output Areas (MSOAs), which are further divided into 482 Lower Layer Super Output Areas (LSOAs). Each LSOA has an average population size of about 1,600.
-
-In terms of transportation, Leeds is well-connected by air, rail and roads. It is accessible by several major motorways such as the M1 and A62. Congestion is a major problem in Leeds; Leeds was ranked 9th in the UK’s most congested urban areas in 2018 (cite). On the road safety front, pedestrians and cyclists were over-represented in accidents in Leeds. Based on the 2011 census, 15.6% of the surveyed population walk to work, but only 2.3% cycle (cite). However, pedestrians and cyclists respectively accounted for 19.0% and 16.9% of more than 9,000 accident casualties between 2014 and 2018.
+While implementing the right policies is key towards achieving this goal, policies should also be backed by evidence from academic research in the area of pedestrian and cyclist safety. This report seeks to contribute towards this area of research using transport data science techniques. Addressing such transport problems using data science have been made possible with the increasing availability of data and sophisticated analytical and modelling techniques. Its core advantage over traditional methods is the reproducibility of methodologies and findings, which helps to strengthen the credibility and legitimacy of the research. The area of study in this report is Leeds. Notwithstanding, the code and methodologies for this report had been designed for reproducibility and scalability for larger geographical regions beyond Leeds.
 
 ## 1.1 Scope
 
-This report analyses road safety of pedestrians and cyclists in Leeds in terms of four categories: who, when, where and how. We will first articulate the methodologies used in understanding, preparing, cleaning and visualising the data as part of exploratory data analysis (EDA) in Section 2. In Sections 3 to 6, we will perform the analyses in each of the four categories and discuss the results. In Section 7, we will propose policy recommendations to improve road safety for pedestrians and cyclists. We will discuss limitations of our analyses in Section 8 before proposing areas for future research in Section 9. All analyses underlying this report were performed using the R statistical software and are reproducible using the code available at . . .
+The primary objective of this report is to analyse data of accidents involving pedestrians and cyclists in Leeds from 2014 to 2018, with the aim of informing and shaping road safety policies in Leeds. This five-year period was assessed to be suitable to produce meaningful and sufficiently current insights. The analysis is divided into four categories: who, when, where and how. In Section 2, we will first articulate the methodologies used in understanding, preparing, cleaning and visualising data as part of exploratory data analysis (EDA). In Sections 3 to 6, we will perform analyses in each of the four categories. In Section 7, we will propose policy recommendations to improve road safety for pedestrians and cyclists. Finally, we will discuss the key limitations of our analyses in Section 8. All analyses underlying this report is reproducible using the code available at [url]. 
+
+## 1.2 Area of Study
+
+Leeds is situated in the West Yorkshire county of England, occupying 551.7 square kilometres of land area. It has a population size of close to 800,000 [@LowerLayerSuper2019] and a population density of about 1,450 residents per square kilometres. Leeds is divided into 107 Middle Layer Super Output Areas (MSOAs), which are further divided into 482 Lower Layer Super Output Areas (LSOAs). In terms of transportation, Leeds is well-connected by air, rail and roads. It is accessible by several major motorways such as the M1 and A62. Congestion is a major problem in Leeds; Leeds was ranked 9th in the UK’s most congested urban areas in 2018 [@CongestionCostsUK2019]. On the road safety front, pedestrians and cyclists were disproportionately represented in accidents in Leeds. Based on the 2011 census, 15.6% of the surveyed population walk to work, but only 2.3% cycle. However, pedestrians and cyclists respectively accounted for 19.0% and 16.9% of more than 9,000 accident casualties between 2014 and 2018.
+
+## 1.3. Datasets
+
+The main datasets used in this report were of accidents and casualties available from the `stats19` package. In analysing geospatial distribution of accidents, Leeds’ highway data were downloaded from OpenStreetMap using from the `osmdata` package. Origin-destination data of Leeds based on the 2011 census were also obtained from the `pct` package in determining walking and cycling rates in Leeds. In addition, demographic data of MSOAs---population estimates and total annual income---from the Office for National Statistics were used in modelling accident rates in Section 6. The full list of datasets required in this report are available at [url]. 
 
 ```{r, message=FALSE, eval=FALSE, include=FALSE}
 # install.packages("remotes")
@@ -47,10 +53,6 @@ This report analyses road safety of pedestrians and cyclists in Leeds in terms o
 # remotes::install_github("ropensci/stats19")
 # webshot::install_phantomjs()
 ```
-
-# 2. Datasets
-
-We will be using accidents and casualties data from the `stats19` package for the years 2014 to 2018. This five-year period was chosen as it was deemed sufficient to produce meaningful, relevant and current insights. In analysing geospatial distribution of accidents, we will be using Leeds’ highway data from the `osmdata` package. We will also be using origin-destination data of Leeds from the `pct` package to derive walking and cycling rates in Leeds. The datasets required in this report are also available at . . .
 
 ```{r load_packages, eval=TRUE, message=FALSE, warning=FALSE}
 
@@ -74,7 +76,6 @@ library(randomForest)
 library(ModelMetrics)
 
 ```
-
 
 ```{r #load_raw_data_from_web}
 
@@ -125,15 +126,13 @@ for (i in 1:length(years)){
 
 ```
 
-# 3. Data Understanding
+# 3. Data Understanding and Pre-Processing
 
-Before analysing the data, it was important to first understand the contents of the raw datasets before pre-processing them into forms suitable for subsequent analyses. This section will explain these stages in the context of the raw accident and casualties data from the `stats19` package.
+Before analysing the data, it was important to first understand the raw datasets and pre-process them into forms suitable for subsequent analyses. This section will explain these stages in the context of the raw accident and casualties data from the `stats19` package.
 
-## 3.1 Understanding the Raw Datasets
+## 3.1 Understanding the Datasets
 
-A useful way to understand the raw datasets was to first look at the column headings. The `stats19_variables` function provided brief descriptions of the variables. Since these raw datasets would later be concatenated, it was important that their column names matched. We found that for the raw accidents datasets, the names of all of the 33 columns matched. However, for the raw casualties datasets, it was found that the 2014 dataset contained 15 variables, but the rest contained 16. The missing variable was `casualty_imd_decile`, which could have been recorded only from 2015 onwards.
-
-In addition, we used the `str()` function to determine the classes of each variable as well as their values. Doing so allowed us to identify variables which required conversion of classes. For example, the variable `accident_severity` was of `character` class, but given that it is a catagorical variable, it had to be converted to the `factor` class.
+A useful way to understand the raw datasets was to first look at their column headings. The `stats19_variables` function was used to obtain brief descriptions of the columns. As these raw datasets would be concatenated, their column names had to match. It was found that the names of all of the 33 columns for the raw accidents datasets matched. However, for the raw casualties datasets, the 2014 dataset contained 15 columns, but the rest contained 16. The missing variable was `casualty_imd_decile`, which could have been recorded from 2015 onwards only. In addition, `str()` function was used to determine the classes of each variable. This enabled us to identify variables whose classes needed to be converted. For example, the variable `accident_severity` was of `character` class, but given that it was a catagorical variable, it had to be converted to the `factor` class.
 
 ```{r #eda1}
 
@@ -151,9 +150,11 @@ str(raw_ac_2014)
 
 ## 3.2 Data Preparation 
 
-Having gained an understanding of the datasets, the next step was to prepare them for our analyses. We filtered records for Leeds using the `filter()` function. For each year, we used the `left_join()` function to join the raw accident data to the raw casualties data, using accident index as the joining key. Next, we concatenated the datasets for the individual years into a main dataframe using the `bind_rows()` function.
+Having gained an understanding of the datasets, the next step was to prepare them for our analyses. The records for Leeds were filtered using the `filter()` function. For each year, the raw accident data was joined to the raw casualties data using the `left_join()` function, with  accident index as the joining key. The individual datasets were then concatenated using the `bind_rows()` function.
 
-Data cleaning is also an important part of data preparation. The raw datasets from the `stats19` package had been cleaned and formatted to a large extent. Notwithstanding, we found that a minority of the variables contained missing data. One of them was the variable `time`, which had five `NA` values. These missing values were imputed with the median^[Median was chosen over mean as it is typically less sensitive to outliers.] of the non-missing values1. The variable `lsoa_of_accident_location` was also found to have 58 `NA` values. Using `tmap` and the LSOA boundaries data, we manually inspected accident locations corresponding to each missing value and assigned the nearest LSOA to each missing value.
+### stopped here
+
+Data cleaning is also an important part of data preparation. The raw datasets from the `stats19` package had been cleaned and formatted to a large extent. Notwithstanding, we found that a minority of the variables contained missing data. One of them was the variable `time`, which had five `NA` values. These missing values were imputed with the median^[Median was chosen over mean as it is typically less sensitive to outliers.] of the non-missing values1. The variable `lsoa_of_accident_location` was also found to have 58 `NA` values. Using `tmap` and the LSOA boundaries data, we manually inspected accident locations corresponding to each missing value and assigned the nearest LSOA to each missing value. [How did this add value?]
 
 
 ```{r #df_total_ac_leeds}
@@ -757,9 +758,7 @@ The first approach was to analyse the geospatial distribution of accidents by LS
 
 These normalised accident counts will be referred to as "accident index". An accident index ranges between -1 and 1; a negative index indicates that a region has below-average accident count, that is, a safer-than-average accident rate, and a positive index means otherwise. An accident index of around zero suggests that the region is close to the overall average. Thematic maps were plotted with these accident indices, as shown in Figure 7. A divergent colour scale was used to communicate geospatial variations of accident rates in an effective way: blue representing below-average rates and red, above-average. Basemaps were also included to provide some geographical context. 
 
-While an analysis by LSOAs is useful in allowing local authorities to focus on more accident-prone regions, it gives limited information on stretches of roads where pedestrians and cyclists were most susceptible. The second approach was therefore to analyse the geospatial distribution of accidents by road networks. The key objective was to determine the top 10 roads in Leeds which recorded the most accidents for pedestrians and cyclists. The different categories of highways in Leeds were first downloaded from OpenStreetMap using the `osm` package and these individual datasets were then concatenated. The resulting dataset was an simple features (sf) object with linestrings representing stretches of roads. 
-
-Spatial joins were performed using the `st_is_within()` function to link accident point data to the nearest stretch of road within a distance of 5 metres. Names and references of roads from the OpenStreetMap data were essential in this part of the analysis to identify specific road stretches which were most accident-prone. Unfortunately, as the data from OpenStreetMap is crowd-sourced, missingness of data was significantly rampant. 15.8% of the 3,268 accident records for pedestrians and cyclists had to be filtered out due to missing road names. This was the main limitation in this analysis. 
+While an analysis by LSOAs is useful in allowing local authorities to focus on more accident-prone regions, it gives limited information on stretches of roads where pedestrians and cyclists were most susceptible. The second approach was therefore to analyse the geospatial distribution of accidents by roads. The key objective was to determine the top 10 roads in Leeds which recorded the most accidents for pedestrians and cyclists. The different categories of highways in Leeds were first downloaded from OpenStreetMap using the `osm` package and these individual datasets were then concatenated. The resulting dataset was an simple features (sf) object with linestrings representing stretches of roads. Spatial joins were performed using the `st_is_within()` function to link accident point data to the nearest stretch of road within a distance of 5 metres. 
 
 ## 6.2 Results and Discussions
 
@@ -1220,11 +1219,14 @@ lsoa_msoa_lookup <- read.csv("Data/leeds_lsoa_msoa_lookup.csv",
 
 ```
 
-```{r leeds_travel_data, eval=TRUE}
+```{r leeds_od}
 
 # Get origin-destination data for Leeds
 leeds_od = pct::get_od(region = "west-yorkshire") %>% 
   filter(la_1 == "Leeds" & la_2 == "Leeds")
+
+# Save locally as csv file
+write.csv(leeds_od, "Data/leeds_od.csv")
 
 # Create a dataframe for walking and cycling levels by MSOA
 travel_by_origin =
@@ -1237,6 +1239,24 @@ travel_by_origin =
   select(1, 2, 11, 12, 14, 15) # Select only the required columns
 
 ```
+
+```{r travel_by_origin, eval=TRUE}
+
+# Save locally as csv file
+leeds_od <- read.csv("Data/leeds_od.csv")
+
+# Create a dataframe for walking and cycling levels by MSOA
+travel_by_origin =
+  leeds_od %>% 
+  group_by(geo_code1) %>% # Summarise by origin code
+  summarise_if(is.numeric, sum) %>% 
+  dplyr::rename(origin = geo_code1) %>% 
+  mutate(perc_walk = foot * 100 / all) %>% # Calculate walking level (%) by MSOA 
+  mutate(perc_cyc = bicycle * 100 / all) %>% # Calculate cycling level (%) by MSOA
+  select(1, 2, 11, 12, 14, 15) # Select only the required columns
+
+```
+
 
 ```{r walking_and_cycling_levels}
 
@@ -1513,41 +1533,24 @@ Road safety engagement is another key pillar in improving safety of pedestrians 
 
 ## 8.3 Enforcement to Shape Road Users' Behaviours
 
-Given that pedestrians and cyclists are often victims in accidents with motor vehicles, effective traffic enforcement would be helpful in shaping drivers' behaviours and deter egregious driving. 
+Effective traffic enforcement is essential in ensuring that road users comply with traffic rules to make the roads a safer place for everyone. Roads are a shared environment and one's careless or reckless behaviour can potentially impact another's life. Pedestrians and cyclists are typically victims in accidents with motor vehicles. They were also most prone to accidents on weekday evenings and weekday mornings respectively, as we saw in Section 5. Therefore, projecting police presence to enforce traffic rules during these timings at accident-prone areas would shape drivers' behaviours towards safer driving, thereby reducing the chances of accidents with these vulnerable road users. 
 
-# stopped here
-
-can be conducted along these stretches to shape drivers' behaviours and deter egregious driving.
-
-
-
+Local authorities can consider installing more speed cameras along stretches with high numbers of speed-related accidents to detect speeding. In addition, local authorities can explore using technology to automatically detect other traffic offences such as dangerous lane-changing and illegal turns. Pedestrians and cyclists themselves also have a responsibility towards ensuring their own safety. Enforcement of rules against pedestrians and cyclists, such as reckless cycling, riding without helmets and jay-walking, will also send a stern message to these road users. 
 
 # 9. Limitations of Analyses
 
+The analyses presented in this report were not without limitations. In this section, we will highlight two main limitations. The first limitation concerns the quality of data from OpenStreetMap. Given that the data is crowd-sourced, it is not uncommon that the data contains errors and missing values. In Section 6, we used the data of roads in Leeds from OpenStreetMap to perform spatial joins with accident point data. Given that the objective was to identify specific roads which were most accident-prone, road names and references were essential. Unfortunately, 15.8% of the 3,268 accident records for pedestrians and cyclists had to be filtered out due to missing road names after performing the spatial joins. Since it is crowd-sourced, the road data from OpenStreetMap may not be the official data used by local authorities. Therefore, our analyses may yield different results than if official data was used.
 
-spatio-temporal
-
-
-In this section, I plan to state the limitations of this project and how my analyses can be improved/changed.
-
-The first OSM boundary returned by OSM may not be the official boundary used by local authorities
-
-Section 4: limited demographic information about accident victims. 
-
-different roads with same name.
-
-A potential extension of this analysis is to break down these temporal patterns by regions or roads. This could potentially provide further insights on the spatio-temporal distribution of accidents. For instance, a particular stretch of road could have been more accident-prone for either pedestrians or cyclists during a specific time of the day or day of the week. Such information is useful for local authorities to not only implement targeted road safety education but also perform traffic enforcement duties to improve the overall safety.
-
-roads recorded high accidents not because it is unsafe but because they have higher usage. normalised against flow/network data?
+The second limitation is about the assumptions used in our analyses. One example is the methodology in calculating accident rates, described in Section 7.1. The denominator in calculating accident rates was the population of the MSOA. The underlying assumption was that pedestrians and cyclists were involved in accidents at the MSOA where they lived. Given that cyclists are more mobile and typically travel farther distances than pedestrians, this assumption may not as valid for cyclists than it is for pedestrians. Even for pedestrians, the assumption could be questionable. To overcome this, a possible alternative is to use route network data as a proxy for the movement of the transient walking and cycling population within an MSOA. 
 
 # 10. Conclusions
 
-Besides road safety, another transport problem that One of the transport problems that Leeds faces is congestion. Based on a global traffic scorecard published in 2018, Leeds ranked 9th amongst the most congested urban areas in the UK (cite 1). One of the ways to tackle this issue is to encourage more people to adopt active modes of transports, that is, walking and cycling. This is also in line with the UK Government's ambitions to "make cycling and walking people's natural choices for shorter journeys or parts of a longer journey", a commitment made in 2017. It also set out an action plan to 
+Pedestrians and cyclists are especially vulnerable to sustaining serious or even fatal injuries in accidents. Therefore, any efforts to address their safety on the roads will help save lives. They will also help create a safer environment on the roads and thereby alleviate people's fears of being victims to road accidents. Such fears may otherwise be barriers for people to adopt active modes of travel. Such endeavours are also aligned with the UK Government's goal to increase cycling and walking rates. This report has been one such endeavour towards making the roads in Leeds safer for pedestrians and cyclists. 
 
-It set out an action plan to build "safe, attractive routes for cycling and walking by 2040". 
+In this report, we applied transport data science techniques to uncover demographic, temporal and geospatial patterns from accidents involving these vulnerable road users in Leeds between 2014 and 2018. The findings from the analyses and the policy recommendations presented in this report would be of huge relevance for future transport and road safety policies for Leeds. Notwithstanding, with sufficient computational resources, the code underlying this report is reproducible and scalable for larger geographical regions. This report therefore additionally provides a stepping stone for further research which can potentially guide policy-makers towards realising the Government's goal of promoting active travel.
+
 
 A report has found [@citation_key].
-
 
 
 In this section, I plan to recap the key results and policy recommendations, as well as proposed ideas for further research. To make the code reproducible, I will save the code and data as follows:
@@ -1693,7 +1696,15 @@ model_combi_table
 ### JUNK
 
 
-```{r simple_model_ped, eval=TRUE}
+spatio-temporal
+
+
+Section 4: limited demographic information about accident victims. 
+
+A potential extension of this analysis is to break down these temporal patterns by regions or roads. This could potentially provide further insights on the spatio-temporal distribution of accidents. For instance, a particular stretch of road could have been more accident-prone for either pedestrians or cyclists during a specific time of the day or day of the week. Such information is useful for local authorities to not only implement targeted road safety education but also perform traffic enforcement duties to improve the overall safety.
+
+
+```{r simple_model_ped}
 
 set.seed(1234)
 test_idx = sample(nrow(df_master), round(0.20*nrow(df_master)))
@@ -1712,7 +1723,7 @@ rmse_ped = rep(NA, 2)
 
 ```
 
-```{r simple_model_cyc, eval=TRUE}
+```{r simple_model_cyc}
 
 set.seed(1234)
 test_idx = sample(nrow(df_master), round(0.20*nrow(df_master)))
@@ -1736,7 +1747,7 @@ rmse_cyc = rep(NA, 2)
 
 
 
-```{r df_simple_model_results, include=TRUE, eval=TRUE}
+```{r df_simple_model_results}
 
 data.frame(Model=c("Linear Regression", "Random Forest"), Pedestrian=rmse_ped, Cyclist=rmse_cyc) %>% 
   gt() %>% 
