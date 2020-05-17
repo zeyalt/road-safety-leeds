@@ -1,9 +1,6 @@
 ---
 title: "Enhancing Road Safety of Pedestrians and Cyclists in Leeds"
-#subtitle: "Transport Data Science (TRAN5340M)"
 output: pdf_document
-#site: bookdown::bookdown_site
-#output: bookdown::pdf_document2
 #author: "Zeya Lwin Tun (Student ID: 201378539)"
 always_allow_html: true
 header-includes: 
@@ -39,7 +36,7 @@ While implementing the right policies is key towards achieving this goal, polici
 
 ### 1.1 Scope
 
-The primary objective of this report is to analyse accidents involving pedestrians and cyclists in Leeds from 2014 to 2018, with the aim of informing and shaping road safety policies. This five-year period was assessed to be suitable to produce meaningful and sufficiently current insights. The analysis is divided into four categories: who, when, where and how. We will first articulate the methodologies in understanding, preparing, cleaning and visualising data in Section 2. In Sections 3 to 6, we will present our findings from the analyses in each of the four categories. In Section 7, we will apply transport data science techniques on a case study of Lawnswood School. In Section 8, we will propose policy recommendations for pedestrian and cyclist safety. Finally, we will discuss key limitations of our analyses in Section 8. All underlying analyses is reproducible using the code available at this [Github link](https://github.com/zeyalt/road-safety-leeds). 
+The primary objective of this report is to analyse accidents involving pedestrians and cyclists in Leeds from 2014 to 2018, with the aim of informing and shaping road safety policies. This five-year period was assessed to be suitable to produce meaningful and sufficiently current insights. The analysis is divided into four categories: who, when, where and how. We will first articulate the methodologies in understanding, preparing, cleaning and visualising data in Section 2. In Sections 3 to 6, we will present our findings from the analyses in each of the four categories. In Section 7, we will apply transport data science techniques on a case study of Lawnswood School. In Section 8, we will propose policy recommendations for pedestrian and cyclist safety. Finally, we will discuss key limitations of our analyses in Section 9. All underlying analyses is reproducible using the code available at this [Github link](https://github.com/zeyalt/road-safety-leeds). 
 
 ### 1.2 Area of Study
 
@@ -48,14 +45,6 @@ Leeds is situated in the West Yorkshire county of England, occupying 551.7 squar
 ### 1.3. Datasets
 
 The main data used in this report were the accidents and casualties data available from the `stats19` package. This package contains a collection of police-recorded data on road accidents in the UK. In analysing geospatial distribution of accidents, Leeds’ highway data were downloaded from OpenStreetMap from the `osmdata` package. Origin-destination data of Leeds based on the 2011 census were also obtained from the `pct` package to determine walking and cycling rates. In addition, demographic data of MSOAs---population estimates and total annual income---from the Office for National Statistics were used in modelling accident rates in Section 6. The full list of datasets required in this report are also available at this [Github link](https://github.com/zeyalt/road-safety-leeds). 
-
-```{r, message=FALSE, eval=FALSE, include=FALSE}
-# install.packages("remotes")
-# remotes::install_github("itsleeds/pct")
-# remotes::install_github("itsleeds/geofabrik")
-# remotes::install_github("ropensci/stats19")
-# webshot::install_phantomjs()
-```
 
 ```{r load_packages, eval=TRUE, message=FALSE, warning=FALSE}
 
@@ -135,7 +124,7 @@ Before analysing the data, it was necessary to first understand the raw datasets
 
 ### 2.1 Understanding the Datasets
 
-A useful way to understand the raw datasets was to first look at their column headings. The `stats19_variables` function provided brief descriptions of the columns. As these raw datasets would be concatenated, their column names had to match. It was found that the names of all of the 33 columns for the raw accidents datasets matched. However, for the raw casualties datasets, the 2014 dataset contained 15 columns, but the rest contained 16. The missing variable was `casualty_imd_decile`, which could have been recorded from 2015 onwards only. In addition, `str()` function was used to determine the classes of each variable. This enabled us to identify variables whose classes needed to be converted. For example, the variable `accident_severity` was of the `character` class, but given that it was a catagorical variable, it had to be converted to the `factor` class.
+A useful way to understand the raw datasets was to first look at their column headings. The `stats19_variables` function provided brief descriptions of the columns. As these raw datasets would be concatenated, their column names had to match. It was found that the names of all of the 33 columns for the raw accidents datasets matched. However, for the raw casualties datasets, the 2014 dataset contained 15 columns, but the rest contained 16. The missing variable was `casualty_imd_decile`, which could have been recorded from 2015 onwards only. In addition, `str()` function was used to determine the classes of each variable. This enabled us to identify variables whose classes needed to be converted. For example, the variable `accident_severity` was of the `character` class, but given that it was a categorical variable, it had to be converted to the `factor` class.
 
 ```{r #eda1}
 
@@ -198,7 +187,7 @@ df_total_ac_leeds = bind_rows(df_leeds_ac_2014,
 
 ```
 
-These two methods^[Alternative methods of dealing with missing values include deletion, imputation with mean and replacement with zero values.] of data cleaning helped to preserve the records, thereby ensuring that subsequent analyses were not affected by missing data. For instance, manually assigning the 58 missing records with the nearest LSOA ensured that the geospatial analysis in Section 6 was complete.  Apart from checking for missing data, it was also important to check for possible outliers, which could be due to human errors and needed to be removed. 
+These two methods^[Alternative methods of dealing with missing values include deletion, imputation with mean and replacement with zero values.] of data cleaning helped to preserve the records, thereby ensuring that subsequent analyses were not affected by missing data. For instance, manually assigning the 58 missing records with the nearest LSOA ensured that the geospatial analysis in Section 5 was complete.  Apart from checking for missing data, it was also important to check for possible outliers, which could be due to human errors and needed to be removed. 
 
 ```{r #pre_process_1}
 
@@ -349,7 +338,7 @@ desired_cols <- c("accident_index", "date", "year", "month", "day",
 
 df_total_ac_leeds <-
 df_total_ac_leeds %>% 
-  select(all_of(desired_cols))
+  select(all_of(desired_cols)) # Select desired columns only
 
 ```
 
@@ -420,11 +409,11 @@ Out of the 48 variables altogether, 30 were selected for subsequent analyses. We
 
 df_total_ac_leeds <- 
   read.csv("Data/df_total_ac_leeds.csv") %>% 
-  select(-X)
+  select(-X) # Delete the first column
 
 df_total_ac_leeds_cleaned <- 
   read.csv("Data/df_total_ac_leeds_cleaned.csv") %>% 
-  select(-X)
+  select(-X) # Delete the first column
 
 ```
 
@@ -438,35 +427,10 @@ summary(df_total_ac_leeds_cleaned)
 
 ```
 
-```{r #figure_1}
-
-(figure_1 <-
-  df_total_ac_leeds %>% 
-  mutate(month_year = zoo::as.yearmon(date)) %>%
-  group_by(month_year) %>%
-  dplyr::summarise(count = n()) %>% 
-  ggplot(aes(x = as.Date(month_year), y = count)) +
-  geom_line(colour = "steelblue", lwd = 0.9) +
-  scale_x_date(date_breaks = "1 year", date_labels = "%Y") + 
-  geom_point() +
-  labs(x = "Year", 
-       y = "Number of Casualties") +
-  ylim(c(140, 280)))
-
-figure_1 + ggsave("Figures/Figure_1.png", width = 6, height = 4)
-
-```
-
-```{r display_figure_1, fig.cap="A time-series plot of monthly number of accident casualties in Leeds, 2014-2018", eval=FALSE, echo=FALSE, include=FALSE, out.width="50%"}
-
-include_graphics("Figures/Figure_1.png")
-
-```
-
-```{r #figure_2a}
+```{r #figure_1a}
 
 # Bar chart showing total number of accidents in Leeds between 2014 and 2018
-(figure_2a <-
+(figure_1a <-
 df_total_ac_leeds_cleaned %>% 
   group_by(year) %>% 
   dplyr::summarise(count = n()) %>% 
@@ -477,15 +441,14 @@ df_total_ac_leeds_cleaned %>%
   labs(x = "Year", y = "Number of Casualties") + 
   geom_text(aes(label = count), vjust=-0.45, size=3)) 
 
-figure_2a + ggsave("Figures/Figure_2a.png", width = 6, height = 4)
+figure_1a + ggsave("Figures/figure_1a.png", width = 6, height = 4)
 
 ```
 
-
-```{r #figure_2b}
+```{r #figure_1b}
  
 # Breakdown of each year by accident severity
-(figure_2b <-
+(figure_1b <-
   df_total_ac_leeds_cleaned %>% 
   mutate(accident_severity = factor(accident_severity, 
                                     levels = c("Slight", "Serious", "Fatal"))) %>% 
@@ -505,24 +468,14 @@ figure_2a + ggsave("Figures/Figure_2a.png", width = 6, height = 4)
        y = "Number of Casualties") +
   geom_text(aes(label = count), vjust=-0.45, size=3))
 
-figure_2b + ggsave("Figures/Figure_2b.png", width = 6, height = 4)
+figure_1b + ggsave("Figures/figure_1b.png", width = 6, height = 4)
 
 ```
 
-```{r #save_figure_2a_and_2b}
+```{r display_figure_1, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Trends in number of road accident casualties in Leeds, 2014-2018", fig.subcap=c("Casualties by year", "Casualties by year and accident severity"), out.width="47.5%"}
 
-grid.arrange(figure_2a, figure_2b, nrow = 1, ncol = 2)
-
-ggsave("Figures/Figure_2.png", 
-       arrangeGrob(figure_2a, figure_2b, nrow = 1, ncol = 2),
-       width = 12, height = 4)
-
-```
-
-```{r display_figure_2, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Trends in number of road accident casualties in Leeds, 2014-2018", fig.subcap=c("Casualties by year", "Casualties by year and accident severity"), out.width="47.5%"}
-
-include_graphics("Figures/Figure_2a.png")
-include_graphics("Figures/Figure_2b.png")
+include_graphics("Figures/figure_1a.png")
+include_graphics("Figures/figure_1b.png")
 
 ```
 
@@ -538,9 +491,9 @@ The demographic information about accident victims available in the dataset were
 
 The resulting plots are shown in Figure 2. For cyclists, there were significantly more male casualties. This does not necessarily imply that female cyclists were safer; rather, this could be because cycling is typically a male-dominated activity [@WhyDonMore2017; @RoadCyclingStatistics2013]. In contrast, pedestrian casualties had more equal gender ratio. Several target groups can be identified from Figure 2. The bimodal distribution of male cyclist casualties suggests two target groups. The first is male cyclists around 24 years old. They could be tertiary students who cycle to schools. The second is male cyclists around 40 years old. They could be middle-aged men amongst whom sport cycling is widely popular [@WhoWhereWhen2016; @IncompetentTooCompetent2013]. 
 
-```{r #figure_3a}
+```{r #figure_2}
 
-(figure_3a <- 
+(figure_2 <- 
 df_total_ac_leeds %>% 
   filter(cas_type == "Pedestrian" | cas_type == "Cyclist")%>% 
   ggplot(aes(x = age_of_casualty, fill = sex_of_casualty)) +
@@ -552,47 +505,13 @@ df_total_ac_leeds %>%
   theme(legend.position = "top", 
         legend.title = element_blank()))
 
-figure_3a + ggsave("Figures/Figure_3a.png", width = 6, height = 4)
+figure_2 + ggsave("Figures/figure_2.png", width = 6, height = 4)
 
 ```
 
-```{r #figure_3b}
+```{r display_figure_2, fig.cap="Histograms showing distribution by age and gender", eval=TRUE, echo=FALSE, include=TRUE, out.width="50%"}
 
-(figure_3b <- 
-df_total_ac_leeds %>% 
-  filter(cas_type == "Pedestrian" | cas_type == "Cyclist") %>%
-  ggplot(aes(x = sex_of_casualty, y = age_of_casualty, fill = sex_of_casualty)) +
-  geom_boxplot(alpha = 0.6) + 
-  xlab("Sex of Casualty") +
-  ylab("Age of Casualties") +
-  facet_grid(cols = vars(cas_type), scales = "free_y") +
-  theme(legend.position = "top", 
-        legend.title = element_blank()))
-
-figure_3b + ggsave("Figures/Figure_3b.png", width = 6, height = 4)
-
-```
-
-```{r #save_figure_3a_and_3b}
-
-grid.arrange(figure_3a, figure_3b, nrow = 1, ncol = 2)
-
-ggsave("Figures/Figure_3.png", 
-       arrangeGrob(figure_3a, figure_3b, nrow = 1, ncol = 2),
-       width = 12, height = 4)
-
-```
-
-```{r display_figure_33, eval=FALSE, echo=FALSE, include=FALSE, fig.cap="Graphical summaries of profiles of pedestrian and cyclist casualties", fig.subcap=c("Histograms showing distribution by age and gender", "Boxplots summarising casualty age by gender"), out.width="47.5%"}
-
-# include_graphics("Figures/Figure_3a.png")
-# include_graphics("Figures/Figure_3b.png")
-
-```
-
-```{r display_figure_3a, fig.cap="Histograms showing distribution by age and gender", eval=TRUE, echo=FALSE, include=TRUE, out.width="50%"}
-
-include_graphics("Figures/Figure_3a.png")
+include_graphics("Figures/figure_2.png")
 
 ```
 
@@ -608,7 +527,7 @@ To aid us in uncovering temporal patterns, we visualised the data with heatmaps.
 
 ### 4.2 Results and Discussions
 
-The resulting heatmaps are shown in Figures 3 and 4. These heatmaps were extremely informative because they were able to convey the most accident-prone times for pedestrian and cyclist accidents in an effective way through the use of the darker shades. Figure 3 shows that there were more pedestrian casualties in the months of November, December and January than other months. The weather is typically more wet and harsh during these winter months and the roads more slippery. These factors could have affected drivers' judgements, resulting in more accidents with pedestrians. On the flip side, April and August seemed to be relatively safer months for pedestrians. 
+The resulting heatmaps are shown in Figures 3 and 4. These heatmaps were extremely informative because they were able to convey the most accident-prone times for pedestrian and cyclist accidents in an effective way through the use of the darker shades. Figure 3 shows that there were more pedestrian casualties in the months of November, December and January than other months. The weather is typically more wet and harsh during these winter months and the roads more slippery. These factors could have affected drivers' judgement, resulting in more accidents with pedestrians. On the flip side, April and August seemed to be relatively safer months for pedestrians. 
 
 ```{r #df_cal_hm}
 
@@ -630,10 +549,10 @@ df_cal_hm <- ddply(df_cal_hm, .(yearmonth), transform,
 
 ```
 
-```{r #figure_4}
+```{r #figure_3}
 
 # Calendar heat map
-(figure_4 <-
+(figure_3 <-
   df_cal_hm %>% 
   filter(cas_type == "Pedestrian" | cas_type == "Cyclist") %>% 
   group_by(month, monthweek, day_of_week, cas_type) %>% 
@@ -652,13 +571,13 @@ df_cal_hm <- ddply(df_cal_hm, .(yearmonth), transform,
   ylab("") +
   theme_bw() + theme_minimal())
 
-figure_4 + ggsave("Figures/Figure_4.png", width = 12, height = 3)
+figure_3 + ggsave("Figures/figure_3.png", width = 12, height = 3)
 
 ```
 
-```{r display_figure_4, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Heatmap showing the number of pedestrian and cyclist casualties, by day and month", out.width="105%"}
+```{r display_figure_3, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Heatmap showing the number of pedestrian and cyclist casualties, by day and month", out.width="105%"}
 
-include_graphics("Figures/Figure_4.png")
+include_graphics("Figures/figure_3.png")
 
 ```
 
@@ -671,29 +590,27 @@ Figure 4 shows the temporal patterns by time of the day. A common pattern for bo
 # Create a data frame for unique number of accidents involving pedestrians in Leeds from 2014-2018
 df_ped_leeds_accidents =
   df_total_ac_leeds_cleaned %>% 
-  filter(cas_type == "Pedestrian")
+  filter(cas_type == "Pedestrian") # Filter only pedestrian accidents
 
 # Create a data frame for unique number of accidents involving cyclists in Leeds from 2014-2018
 df_cyc_leeds_accidents =
   df_total_ac_leeds_cleaned %>% 
-  filter(cas_type == "Cyclist")
+  filter(cas_type == "Cyclist") # Filter only cyclist accidents
 
 ```
 
-```{r #figure_5}
+```{r #figure_4}
 
 break_hour <- seq(from = 0, to = 24, by = 4)
 
-levels(df_total_ac_leeds$day_of_week)
-
-(figure_5 <- 
+(figure_4 <- 
   df_total_ac_leeds %>% 
   mutate(day_of_week = factor(day_of_week, 
                               levels = c("Sunday", "Monday", "Tuesday", 
                                          "Wednesday", "Thursday", 
                                          "Friday", "Saturday"))) %>% 
-  group_by(accident_index) %>% 
-  distinct() %>% 
+  group_by(accident_index) %>% # Group by accident index
+  distinct() %>% # Select distinct records
   filter(cas_type == "Pedestrian" | cas_type == "Cyclist") %>% 
   group_by(day_of_week, time_hour, cas_type) %>% # Group by day of week and hour of day
   dplyr::summarise(count = n()) %>% # Count number of accidents in each group
@@ -703,17 +620,15 @@ levels(df_total_ac_leeds$day_of_week)
   mutate(time_hour = as.numeric(time_hour)) %>% # Convert class of 'time_hour' to numeric
   arrange(day_of_week, time_hour) %>% # And, arrange by day of the week
   mutate(count = as.integer(count)) %>%  # Convert class of 'count' to integer
-  arrange(cas_type, day_of_week, time_hour) %>%
-  group_by(cas_type) %>% 
-  # dplyr::mutate(prob = count / sum(count)) %>% # Calculate probability
-  mutate(cas_type = factor(cas_type, levels = c("Pedestrian", "Cyclist"))) %>% 
+  arrange(cas_type, day_of_week, time_hour) %>% # Arrange by casualty type, day and time
+  group_by(cas_type) %>% # Group by casualty type
+  mutate(cas_type = factor(cas_type, levels = c("Pedestrian", "Cyclist"))) %>% # Convert to factor class
   ggplot(aes(time_hour, day_of_week)) +
   geom_tile(aes(fill = count), colour = "white", na.rm = TRUE, show.legend = TRUE) +
   scale_fill_distiller(palette = "Oranges", direction = 1, name = "Number\nof Casualties") +
   scale_x_continuous(breaks = break_hour,
                      labels = c("00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00")) +
   theme_bw() + theme_minimal() + 
-  # facet_grid(~cas_type) +
   facet_wrap(vars(cas_type), 2) +
   labs(x = "Hour of Day", y = "") +
   theme(panel.grid.major = element_blank(), 
@@ -721,13 +636,13 @@ levels(df_total_ac_leeds$day_of_week)
         axis.text.x = element_text(angle = 90, vjust = 0.1, hjust = 1))) 
 
 # Save the plot
-figure_5 + ggsave("Figures/figure_5.png", width = 8, height = 4)
+figure_4 + ggsave("Figures/figure_4.png", width = 8, height = 4)
 
 ```
 
-```{r display_figure_5, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Heatmap showing the number of pedestrian and cyclist casualties, by hour and day", out.width="60%"}
+```{r display_figure_4, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Heatmap showing the number of pedestrian and cyclist casualties, by hour and day", out.width="65%"}
 
-include_graphics("Figures/Figure_5.png")
+include_graphics("Figures/figure_4.png")
 
 ```
 
@@ -739,11 +654,11 @@ Having gained insights into the temporal distributions of pedestrian and cyclist
 
 The first approach was to analyse the geospatial distribution of accidents by LSOA regions. The datasets from the `stats19` package contained the LSOA of accident locations, but not their boundaries. The boundary data was obtained from the @2011CensusBoundary2011 and subsequently joined with our working accident dataset. Instead of using absolute accident counts for pedestrians and cyclists, it was assessed that normalising them against the average of each group would be more informative in identifying both regions that are the safest and of greatest concern. In this section, these normalised accident counts will be referred to as "accident index". An accident index ranges between -1 and 1; a negative index indicates that a region has below-average accident count, that is, a safer-than-average accident rate, and a positive index means otherwise. Thematic maps were plotted with these accident indices. A divergent colour scale was used to communicate geospatial variations of accident rates: blue representing below-average rates and red, above-average. Basemaps were also included to provide some geographical context. 
 
-While an analysis by LSOAs is useful in identifying accident-prone regions, it gives limited information on specific stretches of roads where pedestrians and cyclists were most susceptible. The second approach was therefore to analyse the geospatial distribution of accidents by road networks. The key objective was to determine the top 5 roads which recorded the most accidents for pedestrians and cyclists. To do so, data on different categories of highways in Leeds were first downloaded from OpenStreetMap using the `osmdata` package. These individual datasets were concatenated as a single simple features (sf) object with linestrings representing stretches of roads. Spatial joins were performed using the `st_is_within_distance()` function to link accident point data to the nearest stretch of road within a distance of 5 metres. Lastly, the top 5 roads were determined using the `group_by()`, `summarise()`, `arrange()` and `top_n()` functions in the `dplyr` package.
+While an analysis by LSOAs is useful in identifying accident-prone regions, it gives limited information on specific stretches of roads where pedestrians and cyclists were most susceptible. The second approach was therefore to analyse the geospatial distribution of accidents by road networks. The key objective was to determine the top 5 roads which recorded the most accidents for pedestrians and cyclists. To do so, data on different categories of highways in Leeds were first downloaded from OpenStreetMap using the `osmdata` package. These individual datasets were concatenated as a single simple features (sf) object with linestrings representing stretches of roads. Spatial joins were performed using the `st_is_within_distance()` function to link accident point data to the nearest stretch of road within a distance of 5 metres. Lastly, the top 5 roads were determined using the various functions such as `top_n()` in the `dplyr` package.
 
 ### 5.2 Results and Discussions
 
-Figures 5a and 5b show thematic maps depicting geospatial distributions of accident rates for pedestrians and cyclists respectively by LSOAs. The LSOA with the highest pedestrian accident index was E01033010, represented by the darkest shade in Figure 6a. This corresponds to Leeds city centre. Many neighbouring LSOAs also had above-average accident indices for pedestrian accidents. Since it is the city centre, the human pedestrian traffic would reasonably be high. Data from the 2011 census showed that E01033010 had the highest levels of walking amongst all LSOAs. Notwithstanding, out of 103 pedestrian accidents recorded over the five-year period, none resulted in fatalities. Given that traffic congestion is not uncommon in the city centre [@CongestionCostsUK2019], the speed of traffic would be moderate to slow, which meant that serious and fatal pedestrian injuries were less likely. 
+Figures 5a and 5b show thematic maps depicting geospatial distributions of accident rates for pedestrians and cyclists respectively by LSOAs. The LSOA with the highest pedestrian accident index was E01033010, represented by the darkest shade in Figure 5a. This corresponds to Leeds city centre. Many neighbouring LSOAs also had above-average accident indices for pedestrian accidents. Since it is the city centre, the human pedestrian traffic would reasonably be high. Data from the 2011 census showed that E01033010 had the highest levels of walking amongst all LSOAs. Notwithstanding, out of 103 pedestrian accidents recorded over the five-year period, none resulted in fatalities. Given that traffic congestion is not uncommon in the city centre [@CongestionCostsUK2019], the speed of traffic would be moderate to slow, which meant that serious and fatal pedestrian injuries were less likely. 
 
 ```{r #download_LSOA_boundaries}
 
@@ -783,15 +698,15 @@ lsoa_boundaries %>%
   full_join(df_total_ac_leeds_cleaned,
             by = c("code" = "lsoa_of_accident_location")) %>% 
   filter(!is.na(accident_index)) %>% # There are 4 NAs and they can be removed.
-  filter(cas_type %in% c("Pedestrian", "Cyclist")) %>% 
-  group_by(code, cas_type) %>% 
-  dplyr::summarise(count = n()) %>% 
-  spread(cas_type, count) %>% 
+  filter(cas_type %in% c("Pedestrian", "Cyclist")) %>% # Select only pedestrian and cyclist accidents
+  group_by(code, cas_type) %>% # Group by lsoa and casualty type
+  dplyr::summarise(count = n()) %>% # Summarise the count
+  spread(cas_type, count) %>% # Reshape the table
   replace_na(list(Pedestrian = 0, Cyclist = 0)) %>% # Replace NAs with 0s since these represent 0 accidents
   mutate(pedestrian = ((Pedestrian - mean(Pedestrian))/(max(Pedestrian) - mean(Pedestrian))),
-         cyclist = ((Cyclist - mean(Cyclist))/(max(Cyclist) - mean(Cyclist)))) %>% 
-  select(1, 5, 6) %>%  
-  gather(pedestrian, cyclist, key = casualty, value = `Accident Index`, -code))  
+         cyclist = ((Cyclist - mean(Cyclist))/(max(Cyclist) - mean(Cyclist)))) %>% # Compute normalised accident rates
+  select(1, 5, 6) %>%  # Select the desired columns
+  gather(pedestrian, cyclist, key = casualty, value = `Accident Index`, -code)) # Revert the shape of table
 
 ```
 
@@ -802,22 +717,22 @@ sf_norm_cyc_by_lsoa = sf_norm_by_lsoa %>% filter(casualty == "cyclist")
 
 ```
 
-```{r #figure_6a}
+```{r #figure_5a}
 
 tmap_mode("view")
 
-(figure_6a <-
-tm_basemap(leaflet::providers$Esri.WorldStreetMap, alpha = 0.4) +
+(figure_5a <-
+  tm_basemap(leaflet::providers$Esri.WorldStreetMap, alpha = 0.4) +
   tm_shape(lsoa_boundaries) +
-  tm_polygons(col = "#B7D8E8", alpha = 0.6)+
+  tm_polygons(col = "#B7D8E8", alpha = 0.6) +
   tm_shape(sf_norm_ped_by_lsoa) +
   tm_polygons("Accident Index", palette = "-RdBu", alpha = 0.6, lwd = 0.3)) 
 
 ```
 
-```{r #figure_6b}
+```{r #figure_5b}
 
-(figure_6b <-
+(figure_5b <-
 tm_basemap(leaflet::providers$Esri.WorldStreetMap, alpha = 0.4) +
   tm_shape(lsoa_boundaries) +
   tm_polygons(col = "#B7D8E8", alpha = 0.6)+
@@ -826,10 +741,10 @@ tm_basemap(leaflet::providers$Esri.WorldStreetMap, alpha = 0.4) +
 
 ```
 
-```{r display_figure_6, eval=TRUE, echo=FALSE, include=TRUE, fig.show="hold", fig.cap="Thematic maps showing geospatial distribution of accidents by LSOAs", fig.subcap=c("Pedestrian accident index", "Cyclist accident index"), out.width="47.5%"}
+```{r display_figure_5, eval=TRUE, echo=FALSE, include=TRUE, fig.show="hold", fig.cap="Thematic maps showing geospatial distribution of accidents by LSOAs", fig.subcap=c("Pedestrian accident index", "Cyclist accident index"), out.width="50%"}
 
-include_graphics("Figures/figure_6a.png")
-include_graphics("Figures/figure_6b.png")
+include_graphics("Figures/figure_5a.png")
+include_graphics("Figures/figure_5b.png")
 
 ```
 
@@ -998,7 +913,6 @@ sf_cyc_points <-
     distinct(accident_index, .keep_all = TRUE) %>% 
     filter(!is.na(name)) 
 
-
 ```
 
 ```{r #sf_vru_points_lines}
@@ -1058,7 +972,7 @@ sf_vru_lines = st_read("Data/sf_vru_lines")
 
 ```
 
-```{r}
+```{r #clean_stray_linestrings}
 
 set.seed(1234)
 
@@ -1096,16 +1010,14 @@ r1 %>%
 #   tm_shape(sf_top5_vru_points) +
 #   tm_dots("cas_type", palette = "Set1")
 
-
-
 ```
 
-```{r #figure_7}
+```{r #figure_6}
 
 # Creating the tmap and saving it as tmap object
 tmap_mode("view")
 
-(figure_7 <-
+(figure_6 <-
     tm_basemap(leaflet::providers$Esri.WorldStreetMap, alpha = 0.5) +
     tm_shape(r2) +
     tm_lines("cas_type", popup.vars = c("cas_type", "index"), 
@@ -1165,15 +1077,15 @@ merge(data.frame(ped_table, row.names = NULL), data.frame(cyc_table, row.names =
 
 ```
 
-```{r display_figure_7, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Top 5 roads with highest accident counts for pedestrians and cyclists", out.width="55%"}
+```{r display_figure_6, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Top 5 roads with highest accident counts for pedestrians and cyclists", out.width="55%"}
 
-include_graphics("Figures/figure_7.png")
+include_graphics("Figures/figure_6.png")
 
 ```
 
 ## 6. The 'How': Modelling Accident Rates
 
-In this section, we will model pedestrian and cylist accident rates by MSOAs using various predictor variables. The aim is to understand how accident rates could be correlated with various socio-demographic factors. 
+In this section, we will model pedestrian and cyclist accident rates by MSOAs using various predictor variables. The aim is to understand how accident rates could be correlated with various socio-demographic factors. 
 
 ### 6.1 Methodology
 
@@ -1193,7 +1105,7 @@ lsoa_msoa_lookup <- read.csv("Data/leeds_lsoa_msoa_lookup.csv",
 
 ```
 
-```{r leeds_od}
+```{r #leeds_od}
 
 # Get origin-destination data for Leeds
 leeds_od = pct::get_od(region = "west-yorkshire") %>% 
@@ -1232,8 +1144,7 @@ travel_by_origin =
 
 ```
 
-
-```{r walking_and_cycling_levels}
+```{r #walking_and_cycling_levels}
 
 # What is the walking level in Leeds City Centre?
 
@@ -1254,13 +1165,6 @@ leeds_pct %>%
   mutate(perc_cyc = bicycle * 100/all) %>% 
   arrange(desc(perc_cyc)) %>% 
   select(geo_code, perc_cyc)
-
-```
-
-```{r}
-
-travel_by_origin %>% 
-  dplyr::summarise(sum(all), sum(foot), sum(bicycle))
 
 ```
 
@@ -1337,14 +1241,6 @@ annual_income <- read.csv("Data/leeds-total-annual-income-2018.csv",
     left_join(annual_income, by = c("msoa_code" = "MSOA.code")) %>% 
     select(-7)) 
 
-#write.csv(df_master, "Data/df_master.csv")
-
-```
-
-```{r read_df_master}
-
-df_master = read.csv("df_master.csv")
-
 ```
 
 Figure 7 shows the cross-validation results. For both groups, Models 9 to 14, which were random forest models, did not produce any predictions with the lowest RMSE. This implies that multiple linear regression was the more superior statistical model. The best model for predicting pedestrian accident rates was Model 5. This uses two predictor variables--walking levels and total annual income. On the other hand, Model 4 was the best model for predicting cyclist accident rates. This model uses cycling levels and population density as predictor variables. 
@@ -1371,6 +1267,8 @@ model_combi_table <-
 model_combi_table %>%
   gt() %>% 
   tab_source_note(source_note = "Note: Models 1 to 7 are multiple linear regression models, whereas Models 8 to 14 are random forest models.")
+
+# Table displayed as Appendix.
 
 ```
 
@@ -1412,7 +1310,7 @@ for (j in (1:500)) {
 }
 
 # Plot a histogram of how often each model wins
-(figure_8a <-
+(figure_7a <-
   ggplot(data = data.frame(winner_ped), aes(x = winner_ped)) +
   geom_histogram(color="black", fill="white", binwidth = 1) +
   scale_x_continuous(breaks = seq(1, 14), labels = seq(1, 14)) +
@@ -1421,7 +1319,7 @@ for (j in (1:500)) {
   theme(plot.caption = element_text(size = 10, face = "bold", hjust = 0.5)))
 
 # Save the plot
-figure_8a + ggsave("Figures/figure_8a.png", width = 6, height = 3)
+figure_7a + ggsave("Figures/figure_7a.png", width = 6, height = 3)
 
 ```
 
@@ -1463,7 +1361,7 @@ for (j in (1:500)) {
 }
 
 # Plot a histogram of how often each model wins
-(figure_8b <-
+(figure_7b <-
   ggplot(data = data.frame(winner_cyc), aes(x = winner_cyc)) +
   geom_histogram(color="black", fill="white", binwidth = 1) +
   scale_x_continuous(breaks = seq(1, 14), labels = seq(1, 14)) +
@@ -1472,37 +1370,26 @@ for (j in (1:500)) {
   theme(plot.caption = element_text(size = 10, face = "bold", hjust = 0.5)))
 
 # Save the plot
-figure_8b + ggsave("Figures/figure_8b.png", width = 6, height = 3)
+figure_7b + ggsave("Figures/figure_7b.png", width = 6, height = 3)
 
 ```
 
-```{r display_figure_8, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Results of cross-validation", fig.subcap=c("Prediction of Pedestrian Accident Rates", "Prediction of Cyclist Accident Rates"), out.width="45%"}
+```{r display_figure_7, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Results of cross-validation", fig.subcap=c("Prediction of Pedestrian Accident Rates", "Prediction of Cyclist Accident Rates"), out.width="45%"}
 
-include_graphics("Figures/Figure_8a.png")
-include_graphics("Figures/Figure_8b.png")
+include_graphics("Figures/figure_7a.png")
+include_graphics("Figures/figure_7b.png")
 
 ```
 
-Although these two models provided insights on the correlations between the response and predictor variables, they did not necessarily imply casuality^[Correlation represents the size and direction of relationships between variables, whereas causality implies some form of cause-and-effect relationships.]. Correlations nevertheless provide useful information and can help guide further research into the causal relationships between variables. For instance, knowing that cycling levels and population density were good predictors of cycling accident rates, we can conduct further research to investigate how and why these factors influence cycling accident rates. 
+Although these two models provided insights on the correlations between the response and predictor variables, they did not necessarily imply causality^[Correlation represents the size and direction of relationships between variables, whereas causality implies some form of cause-and-effect relationships.]. Correlations nevertheless provide useful information and can help guide further research into the causal relationships between variables. For instance, knowing that cycling levels and population density were good predictors of cycling accident rates, we can conduct further research to investigate how and why these factors influence cycling accident rates. 
 
 ## 7. A Case Study of Lawnswood School
 
 In Section 3, we identified young children as one of the target groups of concern. About a quarter of children of school-going ages in Leeds sustained serious or fatal injuries in accidents. It is therefore of utmost importance for local authorities to address their safety. A question of interest would be, "How safe are roads near schools?" This can be addressed using transport data science techniques. In this section, we will demonstrate this using Lawnswood School as an example. 
 
-```{r}
+Geographic data of schools in Leeds were first downloaded using the `osmdata` package. Next, the polygon data for Lawnswood School was selected and casted as multi-linestrings using `st_cast()`. These multi-linestrings were spatially joined with the sf object representing roads in Leeds used in Section 5. We used `st_join()` with `st_is_within_distance` and `dist = 400` to identify roads within a network distance^[One advantage of this road network-based buffers over circular buffers around an geographical entity is that its findings would be closer to reality since people would mainly use road networks to travel from one point to another.] of 400 metres. Next, we used the `geo_buffer()` function in the `stplanr` package to create buffers of 10 metres for each linestring. Lastly, using `st_intersects`, this buffer layer was spatially joined with the point data of accident involving children between 11 and 18 to identify accidents within the network distance of 400 metres. The result is shown in Figure 8. 
 
-# How many accidents were there involving school children, breakdown
-# by accident severity?
-df_ped_leeds_accidents %>% 
-  filter(age_of_casualty >= 7 & age_of_casualty <= 18) %>% 
-  group_by(accident_severity) %>% 
-  dplyr::summarise(count = n())
-
-```
-
-Geographic data of schools in Leeds were first downloaded using the `osmdata` package. Next, the polygon data for Lawnswood School was selected and casted as multi-linestrings using `st_cast()`. These multi-linestrings were spatially joined with the sf object representing roads in Leeds used in Section 5. We used `st_join()` with `st_is_within_distance` and `dist = 400` to identify roads within a network distance^[One advantage of this road network-based buffers over circular buffers around an geographical entity is that its findings would be closer to reality since people would mainly use road networks to travel from one point to another.] of 400 metres. Next, we used the `geo_buffer()` function in the `stplanr` package to create buffers of 10 metres for each linestring. Lastly, this buffer layer was spatially joined with the point data of accident involving children between 11 and 18 to identify accidents within the network distance of 400 metres. The result is shown in Figure 8. 
-
-```{r}
+```{r #lawnswood_analysis}
 
 # Download data of schools in Leeds from OpenStreetMap
 sf_osm_leeds_schools = 
@@ -1550,9 +1437,9 @@ tm_shape(sf_leeds_schools_sample) + tm_lines() +
 
 ```
 
-```{r display_figure_9, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Buffer of roads around Lawnswood School (yellow) with children-related accident locations (blue)", out.width="42.5%"}
+```{r display_figure_8, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Buffer of roads around Lawnswood School (yellow) with children-related accident locations (blue)", out.width="42.5%"}
 
-include_graphics("Figures/figure_9.png")
+include_graphics("Figures/figure_8.png")
 
 ```
 
@@ -1562,7 +1449,7 @@ Such an analysis can answer several questions. We can assess how safe these road
 
 Given the above analyses, we propose a three-pronged strategy in enhancing the road safety of pedestrians and cyclists in Leeds---Engineering, Engagement and Enforcement. The key recommendations are outlined below.
 
-**Engineering**: We saw in Section 6 that Leeds city centre had high numbers of pedestrian and cyclist accidents. To reduce such accidents, more non-signalised crossings such as zebra crossings can be introduced to provide more options for crossing of roads. Barriers can be errected between pavements and roads to deter jay-walking. For cyclists, existing cycling lanes can be converted to segregated lanes with kerbs, similar to the 2.5 mile-long segregated cycling lane in the city centre [@CycleSuperhighwayLeeds2019]. In addition, existing cycling infrastructures, especially on roads with high cyclist accident counts, can be improved. Possible areas of improvement include repainting of faded lanes and lane-widening.  
+**Engineering**: We saw in Section 5 that Leeds city centre had high numbers of pedestrian and cyclist accidents. To reduce such accidents, more non-signalised crossings such as zebra crossings can be introduced to provide more options for crossing of roads. Barriers can be erected between pavements and roads to deter jay-walking. For cyclists, existing cycling lanes can be converted to segregated lanes with kerbs, similar to the 2.5 mile-long segregated cycling lane in the city centre [@CycleSuperhighwayLeeds2019]. In addition, existing cycling infrastructures, especially on roads with high cyclist accident counts, can be improved. Possible areas of improvement include repainting of faded lanes and lane-widening.  
 
 **Engagement**: Targeted road safety engagement is key in addressing safety of specific target groups. In Section 6, we saw that Harehills Lane was the only road in the top 5 lists that does not lead to the city centre but yet recorded many pedestrian accidents. Local authorities can engage residents in its vicinity on tips to improve their safety on the roads. Local authorities can also engage other target groups, such as those we identified in Section 3.2. For instance, they can engage children at schools or senior citizens at churches to educate them on road safety. 
 
@@ -1570,26 +1457,15 @@ Given the above analyses, we propose a three-pronged strategy in enhancing the r
 
 ## 9. Limitations of Analyses
 
-The analyses in this report were not without limitations. In this section, we will highlight two main limitations. The first concerns the quality of data from OpenStreetMap. Given that the data is crowd-sourced, errors and missing data was prevalent. In Section 6, we used the OpenStreetMap's road data to perform spatial joins with accident point data. Given that the objective was to identify specific accident-prone roads, road names were essential. Unfortunately, 15.8% of the accident records had to be filtered out due to missing road names. In addition, the road data from OpenStreetMap may not be the official data used by local authorities, which means that our analysis may yield different results if official data was used.
+The analyses in this report were not without limitations. In this section, we will highlight two main limitations. The first concerns the quality of data from OpenStreetMap. Given that the data is crowd-sourced, errors and missing data was prevalent. In Section 5, we used the OpenStreetMap's road data to perform spatial joins with accident point data. Given that the objective was to identify specific accident-prone roads, road names were essential. Unfortunately, 15.8% of the accident records had to be filtered out due to missing road names. In addition, the road data from OpenStreetMap may not be the official data used by local authorities, which means that our analysis may yield different results if official data was used.
 
 The second limitation is about the methodology in calculating accident rates, described in Section 6.1. The denominator used was population of MSOA. The underlying assumption was that pedestrians and cyclists were involved in accidents at the MSOA where they lived. In reality, the population is always moving and therefore, this assumption may not be strong. Instead, an alternative method would be to use route network data as a proxy for the movement of the transient walking and cycling population within an MSOA. 
 
 ## 10. Conclusions
 
-Pedestrians and cyclists are especially vulnerable to serious or even fatal injuries in accidents. Moreover, @InvestigatingRatesImpacts2015 found that experiencing or witnessing near-misses such as dangerous passing manoeuvres by larger vehicles contributes to the perception of risks and prevents people from adopting cycling. Therefore, any efforts to address their safety on the roads will not only help save lives but also alleviate fears and encourage uptake. Such endeavours are also aligned with the national goal to increase cycling and walking rates. This report has been one such endeavour towards safer roads and an uptake of walking and cycling in Leeds. 
+Pedestrians and cyclists are especially vulnerable to serious or even fatal injuries in accidents. Moreover, @InvestigatingRatesImpacts2015 found that experiencing or witnessing near-misses such as dangerous passing manoeuvres by larger vehicles contributes to the perception of risks and prevents people from adopting cycling. Therefore, any efforts to address their safety on the roads will not only help save lives but also alleviate people's fears of being victims of road accidents. Such endeavours are also aligned with the national goal to increase cycling and walking rates. This report has been one such endeavour towards safer roads and an uptake of walking and cycling in Leeds. 
 
 We uncovered demographic, temporal and geospatial patterns from accidents involving these vulnerable road users in Leeds between 2014 and 2018. The findings from the analyses and the policy recommendations would be of huge relevance for future transport and road safety policies for Leeds. With sufficient computational resources, the code underlying this report will also be reproducible and scalable for larger regions and longer time periods. This report therefore provides a foundation for further research, which can potentially guide policy-makers towards realising the Government's ambition of promoting active travel in the UK.
-
-```{r, echo=FALSE}
-# Save outputs into zip file:
-# zip(zipfile = "coursework-template.zip", files = c(
-#   "coursework-template.Rmd",
-#   "tds.bib",
-#   "timetable.csv"
-# ))
-# piggyback::pb_upload("coursework-template.zip") # ignore this command
-# piggyback::pb_upload("coursework-template.pdf") # ignore this command
-```
 
 \newpage
 ## Appendix A
