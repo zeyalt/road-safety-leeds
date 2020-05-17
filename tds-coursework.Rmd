@@ -31,13 +31,13 @@ knitr::opts_chunk$set(include = FALSE,
 
 ## 1. Introduction
 
-Road safety of pedestrians and cyclists has been a subject of increasing interest for transport researchers and policy-makers worldwide. In the United Kingdom (UK), the Government made a commitment in 2017 to make cycling and walking people's "natural choices for shorter journeys or as a part of a longer journey" [@ukdepartmentfortransportCyclingWalkingInvestment]. To encourage more people to adopt such active travel, the UK Government has been making significant investments over the last decade. Examples include dedicated walking and cycling programmes, cycling proficiency training, as well as schemes such as the Bikeability and Cycle City Ambition schemes [@ukdepartmentfortransportCyclingWalkingInvestment]. To encourage an uptake of walking and cycling, it is also imperative to improve road safety for pedestrians and cyclists. The investment of £85 million to improve road infrastructures for pedestrian and cyclist safety is an example of a positive move by the UK Government [@ukdepartmentfortransportCyclingWalkingInvestment]. 
+Road safety of pedestrians and cyclists has been a subject of increasing interest for transport researchers and policy-makers worldwide. In the United Kingdom (UK), the Government made a commitment in 2017 to make cycling and walking people's "natural choices for shorter journeys or as a part of a longer journey" [@ukdepartmentfortransportCyclingWalkingInvestment]. To encourage more people to adopt such active travel, the UK Government has been making significant investments over the last decade. Examples include dedicated walking and cycling programmes and schemes such as the Bikeability and Cycle City Ambition schemes [@ukdepartmentfortransportCyclingWalkingInvestment]. It is also imperative to improve road safety for pedestrians and cyclists. The investment of £85 million to improve road infrastructures for pedestrian and cyclist safety is an example of a positive move by the UK Government [@ukdepartmentfortransportCyclingWalkingInvestment]. 
 
 While implementing the right policies is key towards achieving this goal, policies should also be supported by evidence from academic research in the area of pedestrian and cyclist safety. This report seeks to contribute towards this research area using transport data science techniques. Addressing such transport problems using data science has been made possible with increasing availability of data and sophisticated analytical and modelling techniques. Its core advantage over traditional methods is reproducibility of methodologies and findings, which strengthens the credibility and legitimacy of the research. This report focuses on Leeds as the area of study, but the code had been designed to be reproducible and scalable for larger regions.
 
 ### 1.1 Scope
 
-The primary objective of this report is to analyse accidents involving pedestrians and cyclists in Leeds from 2014 to 2018, with the aim of informing and shaping road safety policies. This five-year period was assessed to be suitable to produce meaningful and sufficiently current insights. The analysis is divided into four categories: who, when, where and how. We will first articulate the methodologies in understanding, preparing, cleaning and visualising data in Section 2. In Sections 3 to 6, we will present our findings from the analyses in each category. In Section 7, we will propose policy recommendations to improve road safety for pedestrians and cyclists. Finally, we will discuss the key limitations of our analyses in Section 8. All analyses underlying this report is reproducible using the code available at this [Github link](https://github.com/zeyalt/road-safety-leeds). 
+The primary objective of this report is to analyse accidents involving pedestrians and cyclists in Leeds from 2014 to 2018, with the aim of informing and shaping road safety policies. This five-year period was assessed to be suitable to produce meaningful and sufficiently current insights. The analysis is divided into four categories: who, when, where and how. We will first articulate the methodologies in understanding, preparing, cleaning and visualising data in Section 2. In Sections 3 to 6, we will present our findings from the analyses in each category. In Section 7, we will discuss a case study of Lawnswood School. In Section 8, we will propose policy recommendations for pedestrian and cyclist safety. Finally, we will discuss the key limitations of our analyses in Section 8. All underlying analyses is reproducible using the code available at this [Github link](https://github.com/zeyalt/road-safety-leeds). 
 
 ### 1.2 Area of Study
 
@@ -427,7 +427,7 @@ df_total_ac_leeds_cleaned <-
 
 ### 2.3 Exploratory Data Analysis
 
-A key part of exploratory data analysis (EDA) is to extract summary statistics and visualise general trends from the dataset. We used the `summary()` function to obtain a summary of numerical variables, such as `age_of_casualty` and `number_of_vehicles`. We plotted a time-series graph, shown in Figure 1, to understand the trend of road accident casualties over time. To some extent, there was a seasonal pattern, that is, the number of casualties typically increased at the beginning of the year, fluctuated over the next few months, and decreased towards the end of the year. 
+A key part of exploratory data analysis (EDA) is to extract summary statistics and visualise general trends from the dataset. We used the `summary()` function to obtain a summary of numerical variables, such as `age_of_casualty` and `number_of_vehicles`. Figure 2a shows the overall numbers of casualties from 2014 to 2018. It appeared that the roads in Leeds had been becoming safer, with steady declines in the numbers of casualties since 2015. 2018 saw 22% less casualties than 2015. A breakdown by severity of accidents, shown in Figure 2b, revealed further insights. The decline in overall accident numbers since 2015 was largely contributed by decreases in slight and serious accidents. Fatal accidents, however, had been on a rise since 2016.
   
 ```{r #eda2}
 
@@ -454,7 +454,7 @@ figure_1 + ggsave("Figures/Figure_1.png", width = 6, height = 4)
 
 ```
 
-```{r display_figure_1, fig.cap="A time-series plot of monthly number of accident casualties in Leeds, 2014-2018", eval=TRUE, echo=FALSE, include=TRUE, out.width="50%"}
+```{r display_figure_1, fig.cap="A time-series plot of monthly number of accident casualties in Leeds, 2014-2018", eval=FALSE, echo=FALSE, include=FALSE, out.width="50%"}
 
 include_graphics("Figures/Figure_1.png")
 
@@ -523,7 +523,7 @@ include_graphics("Figures/Figure_2b.png")
 
 ```
 
-Figure 2a shows the overall numbers of casualties from 2014 to 2018. It appeared that the roads in Leeds had been becoming safer, with steady declines in the numbers of casualties since 2015. 2018 saw 22% less casualties than 2015. A breakdown by severity of accidents, shown in Figure 2b, revealed further insights. The decline in overall accident numbers since 2015 was largely contributed by decreases in slight and serious accidents. Fatal accidents, however, had been on a rise since 2016.
+
 
 ## 3. The 'Who': Profile of Accident Casualties
 
@@ -535,7 +535,7 @@ The demographic information about accident victims available in the dataset were
 
 ### 3.2 Results and Discussions
 
-The resulting plots are shown in Figure 3. For cyclists, there were significantly more male casualties. This does not necessarily imply that female cyclists were safer; rather, this could be because cycling is typically a male-dominated activity [@WhyDonMore2017]. In contrast, pedestrian casualties had more equal gender ratio. The distribution of male cyclist casualties appeared bimodal, that is, having two peaks---one at 24 and another at 40. The former could be attributed to male tertiary students who cycle to schools, whereas the latter could be middle-aged men amongst whom sport cycling is widely popular [@WhoWhereWhen2016; @IncompetentTooCompetent2013]. On the other hand, the age distributions for male and female pedestrian casualties were both positively skewed, with peaks at 12 and 14 respectively. These could be mainly students who got into accidents during their journeys to or from schools. Unlike the case for cyclist casualties, the age distribution of pedestrian casualties tapers off in the late-80s. This implies two things: cycling levels amongst elderly could be low, and that many elderly were susceptible to accidents as pedestrians. 
+The resulting plots are shown in Figure 3. For cyclists, there were significantly more male casualties. This does not necessarily imply that female cyclists were safer; rather, this could be because cycling is typically a male-dominated activity [@WhyDonMore2017]. In contrast, pedestrian casualties had more equal gender ratio. Several target groups can be identified from Figure 3. The bimodal distribution of male cyclist casualties suggests two target groups. The first is male cyclists around 24 years old. They could be tertiary students who cycle to schools. The second is male cyclists around 40 years old. They could be middle-aged men amongst whom sport cycling is widely popular [@WhoWhereWhen2016; @IncompetentTooCompetent2013]. 
 
 ```{r #figure_3a}
 
@@ -582,14 +582,20 @@ ggsave("Figures/Figure_3.png",
 
 ```
 
-```{r display_figure_3, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Graphical summaries of profiles of pedestrian and cyclist casualties", fig.subcap=c("Histograms showing distribution by age and gender", "Boxplots summarising casualty age by gender"), out.width="47.5%"}
+```{r display_figure_33, eval=FALSE, echo=FALSE, include=FALSE, fig.cap="Graphical summaries of profiles of pedestrian and cyclist casualties", fig.subcap=c("Histograms showing distribution by age and gender", "Boxplots summarising casualty age by gender"), out.width="47.5%"}
 
-include_graphics("Figures/Figure_3a.png")
-include_graphics("Figures/Figure_3b.png")
+# include_graphics("Figures/Figure_3a.png")
+# include_graphics("Figures/Figure_3b.png")
 
 ```
 
-The boxplots in Figure 3b show that pedestrian casualties were of lower median ages than cyclist casualties but had higher inter-quartile range (IQR)^[The IQR is the difference between the upper quartile and lower quartile and represents the middle 50% of data. In boxplots, it is indicated by the height of the box.], meaning that the range of age of casualties was wider. This could also be observed from the histograms in Figure 3a. For cyclist casualties, the median age of male casualties, shown by the middle black line of the box, was slightly higher than that of female casualties, although the spread of age measured by the IQR were roughly similar. The converse was true for pedestrian casualties---female casualties were of a slightly higher median age than male. 
+```{r display_figure_3a, fig.cap="Histograms showing distribution by age and gender", eval=TRUE, echo=FALSE, include=TRUE, out.width="50%"}
+
+include_graphics("Figures/Figure_3a.png")
+
+```
+
+The age distributions for male and female pedestrian casualties were both positively skewed, with peaks at 12 and 14 respectively. This suggests that young children could be another target group. They could be students who got into accidents during their journeys to or from schools. Unlike the case for cyclist casualties, the age distribution of pedestrian casualties tapers off in the late-80s. This implies two things: cycling levels amongst elderly could be low, and that many elderly were susceptible to accidents as pedestrians. 
 
 ## 4. The 'When': Temporal Distribution of Accidents
 
@@ -738,7 +744,7 @@ While an analysis by LSOAs is useful in identifying accident-prone regions, it g
 
 ### 5.2 Results and Discussions
 
-Figures 6a and 6b show thematic maps depicting the geospatial distributions of accident rates for pedestrians and cyclists respectively by LSOAs. The LSOA with the highest pedestrian accident index was E01033010, represented by the darkest shade in Figure 6a. This corresponds to the Leeds city centre and it recorded 103 pedestrian accidents over the five-year period. Many neighbouring LSOAs also had above-average accident indices for pedestrian accidents. Since it is the city centre, the human pedestrian traffic would reasonably be high. Data from the 2011 census showed that E01033010 had the highest levels of walking amongst all LSOAs. Notwithstanding, none of these 103 pedestrian accidents resulted in fatalities. In fact, 75% of them were classified as "slight" accidents. Given that traffic congestion is not uncommon in the city centre [@CongestionCostsUK2019], the speed of traffic would be moderate to slow, which meant that serious and fatal pedestrian injuries were less likely. 
+Figures 6a and 6b show thematic maps depicting geospatial distributions of accident rates for pedestrians and cyclists respectively by LSOAs. The LSOA with the highest pedestrian accident index was E01033010, represented by the darkest shade in Figure 6a. This corresponds to Leeds city centre. Many neighbouring LSOAs also had above-average accident indices for pedestrian accidents. Since it is the city centre, the human pedestrian traffic would reasonably be high. Data from the 2011 census showed that E01033010 had the highest levels of walking amongst all LSOAs. Notwithstanding, out of 103 pedestrian accidents recorded over the five-year period, none resulted in fatalities. Given that traffic congestion is not uncommon in the city centre [@CongestionCostsUK2019], the speed of traffic would be moderate to slow, which meant that serious and fatal pedestrian injuries were less likely. 
 
 ```{r #download_LSOA_boundaries}
 
@@ -1166,54 +1172,13 @@ include_graphics("Figures/figure_7.png")
 
 ```
 
-### Further analysis 
-
-```{r}
-
-tmap_mode("view")
-
-df_cyc_leeds_accidents %>% 
-  filter(age_of_casualty >= 22 & age_of_casualty <= 26) %>% 
-  filter(accident_severity %in% c("Serious", "Fatal")) %>% 
-  format_sf() %>% 
-  st_transform(4326) %>%
-  tm_shape() + 
-  tm_dots("accident_severity")
-  
-
-df_ped_leeds_accidents %>% 
-  filter(age_of_casualty >= 65) %>% 
-  format_sf() %>% 
-  st_transform(4326) %>%
-  tm_shape() +
-  tm_dots("accident_severity")
-
-df_ped_leeds_accidents %>% 
-  filter(time_hour >= 15 & time_hour <= 18) %>% 
-    filter(accident_severity %in% c("Serious", "Fatal")) %>% 
-    format_sf() %>% 
-  st_transform(4326) %>%
-  tm_shape() +
-  tm_dots("accident_severity")
-  
-df_cyc_leeds_accidents %>% 
-  filter(time_hour >= 7 & time_hour <= 9) %>% 
-    filter(accident_severity %in% c("Serious", "Fatal")) %>% 
-    format_sf() %>% 
-  st_transform(4326) %>%
-  tm_shape() +
-  tm_dots("accident_severity")
-
-```
-
-
 ## 6. The 'How': Modelling Accident Rates
 
-In this section, we will model accident rates for pedestrians and cyclists in Leeds by MSOAs using various predictor variables. The central aim is to gain an understanding on how accident rates in a specific region could be correlated with various socio-demographic factors. 
+In this section, we will model pedestrian and cylist accident rates by MSOAs using various predictor variables. The aim is to understand how accident rates could be correlated with various socio-demographic factors. 
 
 ### 6.1 Methodology
 
-The response variable in our modelling was the pedestrian or cyclist accident rates of each MSOA. We defined "accident rate" as the number of accidents per 1,000 residents in a specified MSOA. To compute accident rates, the total number of accidents recorded in each MSOA was divided by the population of the MSOA^[For instance, with a population size of 6,909 and a total pedestrian accident count of 16, the MSOA with the code "E02002331" has a pedestrian accident rate of 2.32 per 1,000 residents.]. The 2018 population numbers were used as proxies in estimating the population size of each MSOA. Three predictor variables were used to model and predict the response variable. The first variable was walking or cycling levels by MSOA, calculated using the origin-destination (OD) data from the 2011 census available from the `pct` package. The other variables were population density and total annual income. We explored two statistical models---multiple linear regression and random forest. With these two statistical models and seven possible combinations of the three predictor variables, there were 14 possible models each for predicting pedestrian and cyclist accident rates. These models are summarised in Appendix B.
+The response variable in our modelling was the pedestrian or cyclist accident rates of each MSOA. We defined "accident rate" as the number of accidents per 1,000 residents in a MSOA. To compute accident rates, the total number of accidents in each MSOA was divided by the population of the MSOA^[For instance, with a population size of 6,909 and a total pedestrian accident count of 16, the MSOA with the code "E02002331" has a pedestrian accident rate of 2.32 per 1,000 residents.]. The 2018 population numbers were used as proxies for the population of each MSOA. Three predictor variables were used. The first was walking or cycling levels by MSOA, calculated using origin-destination data from the `pct` package. The other variables were population density and total annual income. We explored two statistical models---multiple linear regression and random forest. With these two statistical models and seven combinations of the three predictor variables, there were 14 possible models each for predicting pedestrian and cyclist accident rates. These models are tabulated in Appendix B.
 
 The dataset was first divided into training and test datasets based on an 80:20 split. The 14 models were trained using the training data with the `glm()` and `randomForest()` functions, and predictions were generated using `predict()` with the fitted models, given input values in the test data. A metric known as the "root-mean-squared-error" (RMSE)^[RMSE is a measure of how close the predicted values are from the actual values. Lower RMSE implies better predictions.] was used to evaluate the predictions against the actual accident rates in the test data. We performed cross-validation with 500 iterations to improve predictive performance, as well as to aid us in choosing the best model based on the lowest RMSE criterion.
 
@@ -1385,7 +1350,7 @@ df_master = read.csv("df_master.csv")
 
 Figure 8 shows the cross-validation results. For both groups, Models 9 to 14, which were random forest models, did not produce any predictions with the lowest RMSE. This implies that multiple linear regression was the more superior statistical model. The best model for predicting pedestrian accident rates was Model 5. This uses two predictor variables--walking levels and total annual income. On the other hand, Model 4 was the best model for predicting cyclist accident rates. This model uses cycling levels and population density as predictor variables. 
 
-Although these two models provide insights on the correlations between the response and predictor variables, they do not necessarily imply casuality^[Correlation represents the size and direction of relationships between variables, whereas causality implies some form of cause-and-effect relationships.]. Correlations nevertheless provide useful information and can help guide further research into the causal relationships between variables. For instance, knowing that cycling levels and population density were good predictors of cycling accident rates, we can conduct further research to investigate how and why these factors influence cycling accident rates. 
+
 
 ```{r model_combi_table, eval=TRUE, include=TRUE}
 
@@ -1521,9 +1486,11 @@ include_graphics("Figures/Figure_8b.png")
 
 ```
 
+Although these two models provide insights on the correlations between the response and predictor variables, they do not necessarily imply casuality^[Correlation represents the size and direction of relationships between variables, whereas causality implies some form of cause-and-effect relationships.]. Correlations nevertheless provide useful information and can help guide further research into the causal relationships between variables. For instance, knowing that cycling levels and population density were good predictors of cycling accident rates, we can conduct further research to investigate how and why these factors influence cycling accident rates. 
+
 ## 7. A Case Study of Lawnswood School
 
-We have seen in Section 3 that young children was one of the target groups which had been particularly vulnerable to accidents. About a quarter of children of school-going ages sustained serious or fatal injuries. It is therefore of utmost importance for local authorities to address their safety. A question of interest would be, "How safe are roads near schools?" which can be addressed using transport data science techniques. In this section, we will illustrate this using Lawnswood School as an example, but the methodology can be scaled to all schools or to other target groups or locations of interest.  
+In Section 3, we identified young children as one of the target groups of concern. About a quarter of children of school-going ages in Leeds sustained serious or fatal injuries. It is therefore of utmost importance for local authorities to address their safety. A question of interest would be, "How safe are roads near schools?", which can be addressed using transport data science. In this section, we will demonstrate this using Lawnswood School as an example. 
 
 ```{r}
 
@@ -1536,8 +1503,7 @@ df_ped_leeds_accidents %>%
 
 ```
 
-Polygon data of schools in Leeds were first downloaded from OpenStreetMap using the `add_osm_feature()` function with `key = "amenity"` and `value = "school"`. Next, the polygon data for Lawnswood School was selected and casted as linestrings using `st_cast()`. To identify roads in its immediate vicinity, these linestrings were spatially joined with the sf object representing roads in Leeds used in Section 5. In doing so, we used `st_join()` with `join = st_is_within_distance` and `dist = 400`. Lastly, we plotted points representing   
-
+Geographic data of schools in Leeds were first downloaded using the `osm` package. Next, the polygon data for Lawnswood School was selected and casted as multi-linestrings using `st_cast()`. These multi-linestrings were spatially joined with the sf object representing roads in Leeds used in Section 5. We used `st_join()` with `st_is_within_distance` and `dist = 400` to identify roads within a network distance^[One advantage of this road network-based buffers over circular buffers around an geographical entity is that its findings would be closer to reality since people would mainly use road networks to travel from one point to another.] of 400 metres. Next, we used the `geo_buffer()` function in the `stplanr` package to create buffers of 10 metres for each linestring. Lastly, this buffer layer was spatially joined with the data of accident involving children between 11 and 18 to identify accidents within a network distance of 400 metres. The result is shown in Figure 8. 
 
 ```{r}
 
@@ -1557,7 +1523,7 @@ sf_leeds_schools_sample <-
 sf_leeds_schools %>% 
   filter(name == "Lawnswood School") %>%  
   select(name, addr.postcode, addr.city) %>%
-  st_cast(to = "LINESTRING")
+  st_cast(to = "MULTILINESTRING")
 
 # Perform a spatial join to join schools to connecting roads
 sf_roads_near_schools <-
@@ -1575,52 +1541,47 @@ sf_ac_children <-
   format_sf() %>% 
   st_transform(4326)
 
-test = 
-sf_roads_near_schools_buffer %>% 
-  st_join(sf_ac_children, join = st_intersects)
-
-tm_shape(test) + 
-  tm_polygons()
+# Perform a spatial join to join network buffers to accidents point data
+sf_ac_near_schools =
+  sf_ac_children %>% 
+  st_join(sf_roads_near_schools_buffer, join = st_intersects, left = FALSE)
 
 # Visualising
-tm_shape(sf_leeds_schools_sample) + tm_lines(col = "black", lwd = 2) +
-  #tm_shape(sf_roads_near_schools) + tm_lines(col="blue") +
+tm_shape(sf_leeds_schools_sample) + tm_lines() +
   tm_shape(sf_roads_near_schools_buffer) + tm_polygons(col="yellow") +
-  tm_shape(sf_ac_children) + tm_dots(col = "blue")
-
-stplanr::geo_buffer(sf_roads_near_schools, dist = 5) %>% 
-  #st_buffer(sf_roads_near_schools, dist = 5, endCapStyle = "ROUND") %>% 
-  tm_shape() + tm_polygons(col="blue")
+  tm_shape(sf_ac_near_schools) + tm_dots(col = "blue", size = 0.1)
 
 ```
 
+```{r display_figure_9, eval=TRUE, echo=FALSE, include=TRUE, fig.cap="Buffer of roads around Lawnswood School (yellow) with children-related accident locations (blue)", out.width="42.5%"}
 
-, a secondary school in Leeds with students of ages between 11 and 18. These techniques can be scaled to all schools and be used to answer an important question: "" These techniques may be similarly applied for other target groups.
+include_graphics("Figures/figure_9.png")
 
+```
 
+Such an analysis can answer several questions. We can assess how safe these roads were by determining the proportion of all accidents on these roads involving children. We can vary the network buffering distance and evaluate whether distance is a factor in children-related accidents. These methodologies can also be applied to analyse how safe the roads were for other target groups around specific locations. Examples include elderly pedestrian casualties around churches and cyclist casualties around tertiary institutions. Such in-depth analyses can help formulate location- or target group-specific measures to improve road safety. 
 
+## 8. Policy Recommendations
 
-## 7. Policy Recommendations
+Given the above analyses, we propose a three-pronged strategy in enhancing safety of pedestrians and cyclists in Leeds---Engineering, Engagement and Enforcement. The key recommendations are outlined below.
 
-Given the above findings, we propose a three-pronged strategy in enhancing road safety for pedestrians and cyclists in Leeds---Engineering, Engagement and Enforcement. This section outlines key policy recommendations under each category.
+**Engineering**: We saw in Section 6 that Leeds city centre had high numbers of pedestrian and cyclist accidents. To reduce such accidents, more non-signalised crossings such as zebra crossings can be introduced to provide more options for crossing of roads. Barriers can be errected between pavements and roads to deter jay-walking. For cyclists, existing cycling lanes can be converted to segregated lanes with kerbs, similar to the 2.5 mile-long segregated cycling lane in the city centre [@CycleSuperhighwayLeeds2019]. In addition, existing cycling infrastructures, especially on roads with high cyclist accident counts, can be improved. Possible areas of improvement include repainting faded lanes and lane-widening.  
 
-**Engineering**: Road engineering is one key element of road safety. We saw in Section 6 that Leeds city centre had high numbers of pedestrian and cyclist accidents. To reduce such accidents, more non-signalised crossings such as zebra crossings can be introduced. These would provide more options for crossing of roads. Barriers can be errected between pavements and roads to deter jay-walking. For cyclists, more of the existing cycling lanes in the city centre can be segregated from vehicular lanes with kerbs, similar to the 2.5 mile-long segregated cycling lane that was opened in July 2019 as part of the Bradford-Leeds Cycle Superhighway [@CycleSuperhighwayLeeds2019]. In addition, existing cycling infrastructures, especially on roads with high cyclist accident counts, can be improved. Possible areas of improvement include repainting faded lanes and lane-widening.  
+**Engagement**: Targeted road safety engagement is key in addressing safety of specific target groups. In Section 6, we saw that Harehills Lane was the only road in the top 5 lists that does not lead to the city centre but yet recorded many pedestrian accidents. Local authorities can engage residents in its vicinity on tips to improve their safety on the roads. Local authorities can also engage other target groups, such as those we identified in Section 3.2. For instance, they can engage children at schools or senior citizens at churches to educate them on road safety. 
 
-**Engagement**: Targeted road safety engagement is another key pillar in addressing safety concerns of specific road user groups. In Section 6, we saw that Harehills Lane was the only road in the top 5 lists that does not lead to the city centre but yet recorded many pedestrian accidents. Local authorities can engage residents in its vicinity on tips to improve their safety on the roads. Given that there are at least five primary schools near Harehills Lane, it will be useful to educate children of these schools on raod safety. This is especially important because, as we saw in Section 4, children between 12 to 14 years old were particularly prone to accidents. Harehills Lane was an example; local authorities can explore doing such engagements for other areas of concern. Other possible target groups include the sport cycling community, cycling groups at tertiary institutions as well as the senior citizen population.  
+**Enforcement**: Traffic enforcement is essential in ensuring that road users comply with traffic rules and roads are safe. Pedestrians and cyclists are typically victims in accidents with motor vehicles. They were also most prone to accidents on weekday evenings and weekday mornings respectively. Traffic enforcement during these timings at accident-prone areas will help shape drivers' behaviours towards safer driving, thereby reducing chances of accidents. Local authorities can also explore using technology to automatically detect traffic offences such as dangerous lane-changing and illegal turns. Moreover, pedestrians and cyclists have a responsibility towards ensuring their own safety. Enforcement against them for offences such as reckless cycling and jay-walking will nudge them towards safer behaviours.
 
-**Enforcement**: One's careless or reckless behaviour on the road can potentially impact another's life. Effective traffic enforcement is therefore essential in ensuring that road users comply with traffic rules. Pedestrians and cyclists are typically victims in accidents with motor vehicles. They were also most prone to accidents on weekday evenings and weekday mornings respectively. Traffic enforcement during these timings at accident-prone areas will help shape drivers' behaviours towards safer driving, thereby reducing chances of accidents. Local authorities can also explore using technology to automatically detect traffic offences such as dangerous lane-changing and illegal turns. Moreover, pedestrians and cyclists themselves have a responsibility towards ensuring their own safety. Enforcement against pedestrians and cyclists for offences such as reckless cycling and jay-walking will nudge them towards safer behaviours.
+## 9. Limitations of Analyses
 
-## 8. Limitations of Analyses
-
-The analyses presented in this report were not without limitations. In this section, we will highlight two main limitations. The first concerns the quality of data from OpenStreetMap. Given that the data is crowd-sourced, it is not uncommon that the data contains errors and missing values. In Section 6, we used the road data from OpenStreetMap to perform spatial joins with accident point data. Given that the objective was to identify specific roads which were most accident-prone, road names were essential. Unfortunately, 15.8% of the accident records had to be filtered out after the spatial join due to missing road names. In addition, since it is crowd-sourced, the road data from OpenStreetMap may not be the official data used by local authorities. Therefore, our analysis may yield different results if official data was used.
+The analyses in this report were not without limitations. In this section, we will highlight two main limitations. The first concerns the quality of data from OpenStreetMap. Given that the data is crowd-sourced, errors and missing data was prevalent. In Section 6, we used the OpenStreetMap's road data to perform spatial joins with accident point data. Given that the objective was to identify specific accident-prone roads, road names were essential. Unfortunately, 15.8% of the accident records had to be filtered out due to missing road names. In addition, the road data from OpenStreetMap may not be the official data used by local authorities, which means that our analysis may yield different results if official data was used.
 
 The second limitation is about the methodology in calculating accident rates, described in Section 6.1. The denominator was the population of the MSOA. The underlying assumption was that pedestrians and cyclists were involved in accidents at the MSOA where they lived. In reality, the population is always moving. This assumption therefore may not be strong. Instead, a possible alternative would be to use route network data as a proxy for the movement of the transient walking and cycling population within an MSOA. 
 
-## 9. Conclusions
+## 10. Conclusions
 
-Pedestrians and cyclists are especially vulnerable to sustaining serious or even fatal injuries in accidents. Therefore, any efforts to address their safety on the roads will help save lives. Safer roads will also help alleviate people's fears of being victims to road accidents, which may otherwise be barriers in adopting active modes of travel. Such efforts will also be aligned with the UK Government's goal to increase cycling and walking rates. This report has been one such endeavour towards safer roads for pedestrians and cyclists in Leeds and eventually encouraging an uptake of walking and cycling. 
+Pedestrians and cyclists are especially vulnerable to serious or even fatal injuries in accidents. Therefore, any efforts to address their safety on the roads will help save lives. Safer roads will also alleviate people's fears of being victims to road accidents, which may otherwise be barriers in adopting active modes of travel. Such efforts are also aligned with the national goal to increase cycling and walking rates. This report has been one such endeavour towards safer roads and an uptake of walking and cycling in Leeds. 
 
-Using transport data science techniques, we uncovered demographic, temporal and geospatial patterns from accidents involving these vulnerable road users in Leeds between 2014 and 2018. The findings from the analyses and the policy recommendations would be of huge relevance for future transport and road safety policies for Leeds. With sufficient computational resources, the code underlying this report will also be reproducible and scalable for larger geographical regions and longer time periods. This report therefore also provides a foundation for further research, which can potentially guide policy-makers and transport researchers towards realising the Government's goal of promoting active travel in the UK.
+We uncovered demographic, temporal and geospatial patterns from accidents involving these vulnerable road users in Leeds between 2014 and 2018. The findings from the analyses and the policy recommendations would be of huge relevance for future transport and road safety policies for Leeds. With sufficient computational resources, the code underlying this report will also be reproducible and scalable for larger regions and longer time periods. This report therefore provides a foundation for further research, which can potentially guide policy-makers towards realising the Government's ambition of promoting active travel in the UK.
 
 ```{r, echo=FALSE}
 # Save outputs into zip file:
